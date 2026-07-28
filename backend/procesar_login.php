@@ -19,8 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $stmt = $pdo->prepare(
             "SELECT id_usuario, us_usuario, us_password_hash, us_rol
-             FROM usuario
-             WHERE us_usuario = ? AND us_estado = TRUE"
+            FROM usuario
+            WHERE us_usuario = ? AND us_estado = 1"
         );
         $stmt->execute([$usuarioInput]);
         $usuarioBD = $stmt->fetch();
