@@ -1,0 +1,511 @@
+:root {
+    --vino-oscuro: #5b2333;
+    --vino-medio: #7c3248;
+    --dorado: #c9a227;
+    --crema: #f6efe0;
+    --texto: #2e2420;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background-color: var(--crema);
+    font-family: 'Segoe UI', sans-serif;
+    color: var(--texto);
+}
+
+h1, h2, h3, .lib-navbar__brand h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+}
+
+/* ---------- Login (index.php) ---------- */
+.lib-login-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at top, var(--vino-medio), var(--vino-oscuro));
+}
+
+.lib-login-card {
+    background: var(--crema);
+    width: 100%;
+    max-width: 380px;
+    padding: 2.5rem 2rem;
+    border-radius: 4px;
+    border-top: 6px solid var(--dorado);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.lib-login-card h2 {
+    color: var(--vino-oscuro);
+    margin-bottom: 0.25rem;
+    text-align: center;
+}
+
+.lib-login-card p {
+    text-align: center;
+    color: #6d6259;
+    margin-bottom: 1.5rem;
+}
+
+.lib-login-card label {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.lib-login-card input {
+    width: 100%;
+    padding: 0.55rem 0.7rem;
+    margin: 0.3rem 0 1rem;
+    border: 1px solid #cbbfa8;
+    border-radius: 3px;
+    background: #fff;
+}
+
+.lib-btn-primario {
+    width: 100%;
+    padding: 0.65rem;
+    background: var(--vino-oscuro);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+}
+
+.lib-btn-primario:hover { background: var(--vino-medio); }
+
+.lib-alerta {
+    background: #f8d7da;
+    color: #842029;
+    border: 1px solid #f1aeb5;
+    padding: 0.6rem 0.8rem;
+    border-radius: 3px;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+/* ---------- Navbar superior ---------- */
+.lib-navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    background: var(--vino-oscuro);
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-bottom: 4px solid var(--dorado);
+}
+
+.lib-navbar__brand { display: flex; align-items: center; gap: 0.6rem; }
+.lib-navbar__brand .lib-navbar__icono { font-size: 1.8rem; }
+.lib-navbar__brand h1 { font-size: 1.15rem; margin: 0; }
+.lib-navbar__brand small { color: #e7cfd6; }
+
+.lib-navbar__links { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.lib-navbar__links a {
+    color: #f0e2e7;
+    text-decoration: none;
+    padding: 0.4rem 0.75rem;
+    border-radius: 3px;
+    font-size: 0.92rem;
+}
+.lib-navbar__links a:hover { background: rgba(255,255,255,0.12); }
+.lib-navbar__links a.activo { background: var(--dorado); color: var(--vino-oscuro); font-weight: 700; }
+
+.lib-navbar__usuario { display: flex; align-items: center; gap: 0.9rem; font-size: 0.88rem; }
+.lib-btn-salir {
+    color: #fff;
+    border: 1px solid #e7cfd6;
+    padding: 0.3rem 0.7rem;
+    border-radius: 3px;
+    text-decoration: none;
+}
+.lib-btn-salir:hover { background: rgba(255,255,255,0.12); }
+
+/* ---------- Contenido ---------- */
+.lib-contenido { padding: 2rem; max-width: 1100px; margin: 0 auto; }
+
+.lib-bienvenida {
+    background: #fff;
+    border-left: 6px solid var(--dorado);
+    border-radius: 4px;
+    padding: 2.2rem;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+.lib-bienvenida h2 { color: var(--vino-oscuro); margin-bottom: 0.5rem; }
+.lib-bienvenida p { color: #6d6259; }
+
+/* ---------- Encabezado de sección ---------- */
+.lib-cabecera-seccion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.lib-cabecera-seccion h2 { color: var(--vino-oscuro); margin: 0; }
+.lib-cabecera-seccion__botones { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.lib-btn-ancho-auto { width: auto; padding: 0.6rem 1.2rem; }
+.lib-vacio { color: #9c8f81; font-style: italic; }
+
+.lib-alerta {
+    background: #f8d7da;
+    color: #842029;
+    border: 1px solid #f1aeb5;
+    padding: 0.6rem 0.9rem;
+    border-radius: 3px;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+.lib-alerta--ok {
+    background: #e6f2df;
+    color: #365b28;
+    border-color: #bfe0ac;
+}
+.lib-ayuda { font-size: 0.8rem; color: #9c8f81; margin: 0.3rem 0 0; }
+
+/* ---------- Tabla ---------- */
+.lib-tabla-wrap {
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    overflow-x: auto;
+}
+.lib-tabla { width: 100%; border-collapse: collapse; }
+.lib-tabla th, .lib-tabla td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #f0e6d8;
+    font-size: 0.92rem;
+}
+.lib-tabla th {
+    background: var(--vino-oscuro);
+    color: #fff;
+    font-weight: 600;
+}
+.lib-tabla tbody tr:hover { background: #fbf6ec; }
+.lib-acciones { display: flex; gap: 0.5rem; align-items: center; }
+.lib-form-inline { display: inline; }
+
+/* ---------- Chips de género ---------- */
+.lib-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: #f1e3c8;
+    color: var(--vino-oscuro);
+    border: 1px solid var(--dorado);
+    border-radius: 12px;
+    padding: 0.15rem 0.6rem;
+    font-size: 0.8rem;
+    margin: 0.1rem;
+}
+.lib-chip--removible button {
+    background: none;
+    border: none;
+    color: var(--vino-oscuro);
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+
+/* ---------- Botones de acción de la tabla ---------- */
+.lib-btn-editar, .lib-btn-eliminar, .lib-btn-secundario {
+    border: none;
+    border-radius: 3px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.lib-btn-editar { background: var(--dorado); color: var(--vino-oscuro); font-weight: 600; }
+.lib-btn-editar:hover { opacity: 0.85; }
+.lib-btn-eliminar { background: #a5333f; color: #fff; }
+.lib-btn-eliminar:hover { background: #892732; }
+.lib-btn-secundario { background: var(--vino-medio); color: #fff; white-space: nowrap; }
+.lib-btn-secundario:hover { background: var(--vino-oscuro); }
+
+/* ---------- Modal ---------- */
+.lib-modal-fondo {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(46, 36, 32, 0.55);
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+}
+.lib-modal-fondo--visible { display: flex; }
+
+.lib-modal {
+    background: var(--crema);
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 4px;
+    border-top: 6px solid var(--dorado);
+    padding: 1.5rem 1.75rem 1.75rem;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.35);
+}
+.lib-modal__cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+.lib-modal__cabecera h3 { color: var(--vino-oscuro); margin: 0; }
+.lib-modal__cerrar {
+    background: none;
+    border: none;
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--vino-oscuro);
+}
+
+.lib-modal form label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.88rem;
+    margin-top: 0.8rem;
+}
+.lib-modal form input[type="text"], .lib-modal form select {
+    width: 100%;
+    padding: 0.5rem 0.65rem;
+    margin-top: 0.3rem;
+    border: 1px solid #cbbfa8;
+    border-radius: 3px;
+    background: #fff;
+}
+
+.lib-generos-selector { display: flex; gap: 0.5rem; margin-top: 0.3rem; }
+.lib-generos-selector select { flex: 1; margin-top: 0; }
+.lib-tags-lista { margin-top: 0.7rem; min-height: 1.5rem; }
+.lib-modal--angosto { max-width: 360px; }
+
+/* ---------- Badges de estado del ejemplar ---------- */
+.lib-estado {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+.lib-estado--disponible    { background: #e6f2df; color: #365b28; }
+.lib-estado--prestado      { background: #fdecd2; color: #8a5a00; }
+.lib-estado--en-reparación { background: #dfe7f5; color: #2c4a82; }
+.lib-btn-editar--deshabilitado {
+    background: #e4ddcf;
+    color: #9c8f81;
+    cursor: not-allowed;
+}
+.lib-btn-editar--deshabilitado:hover { opacity: 1; }
+
+.lib-btn-eliminar--deshabilitado {
+    background: #e4ddcf;
+    color: #9c8f81;
+    cursor: not-allowed;
+}
+.lib-btn-eliminar--deshabilitado:hover { background: #e4ddcf; }
+
+/* ---------- Aviso tipo toast ---------- */
+.lib-aviso {
+    position: fixed;
+    left: 50%;
+    bottom: 1.5rem;
+    transform: translate(-50%, 20px);
+    background: var(--vino-oscuro);
+    color: #fff;
+    padding: 0.65rem 1.2rem;
+    border-radius: 4px;
+    font-size: 0.88rem;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 100;
+}
+.lib-aviso--visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+/* ---------- Pestañas Activos / Devueltos ---------- */
+.lib-pestanas { display: flex; gap: 0.4rem; margin-bottom: 1rem; }
+.lib-pestana {
+    background: #fff;
+    border: 1px solid #e2d6c0;
+    color: #6d6259;
+    padding: 0.5rem 1.1rem;
+    border-radius: 4px 4px 0 0;
+    cursor: pointer;
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+.lib-pestana--activa {
+    background: var(--vino-oscuro);
+    border-color: var(--vino-oscuro);
+    color: #fff;
+}
+.lib-pestana__contador {
+    display: inline-block;
+    background: rgba(0,0,0,0.12);
+    border-radius: 10px;
+    padding: 0.05rem 0.5rem;
+    font-size: 0.78rem;
+    margin-left: 0.3rem;
+}
+.lib-pestana--activa .lib-pestana__contador { background: rgba(255,255,255,0.25); }
+.lib-vacio--con-padding { padding: 1.5rem; }
+
+/* El botón Eliminar ocupa el ancho completo cuando es la única acción
+   (tabla de préstamos devueltos), para que la columna quede pareja */
+.lib-form-inline--ancho { display: block; width: 100%; }
+.lib-btn-eliminar--ancho { width: 100%; }
+
+/* ---------- Buscador ---------- */
+.lib-buscador { margin-bottom: 1rem; }
+.lib-buscador input {
+    width: 100%;
+    max-width: 420px;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid #cbbfa8;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 0.92rem;
+}
+.lib-buscador input:focus { outline: 2px solid var(--dorado); }
+
+/* ---------- Filtro alfabético (Nombre / Apellido) ---------- */
+.lib-filtro-alfabeto {
+    background: #fff;
+    border-radius: 4px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1.2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.lib-filtro-fila {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+}
+.lib-filtro-fila + .lib-filtro-fila { margin-top: 0.7rem; }
+.lib-filtro-etiqueta {
+    font-weight: 600;
+    color: var(--vino-oscuro);
+    width: 90px;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+}
+.lib-filtro-botones { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.lib-filtro-btn {
+    border: 1px solid #cbbfa8;
+    background: #fff;
+    color: var(--texto);
+    min-width: 2rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+.lib-filtro-btn:hover { border-color: var(--dorado); }
+.lib-filtro-btn--todos { font-weight: 700; }
+.lib-filtro-btn--activo {
+    background: var(--vino-oscuro);
+    border-color: var(--vino-oscuro);
+    color: #fff;
+}
+
+/* ---------- Tarjetas de socio (todas juntas, 2 por fila) ---------- */
+.lib-socios-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+@media (max-width: 640px) {
+    .lib-socios-grid { grid-template-columns: 1fr; }
+}
+.lib-socio-card {
+    background: #fff;
+    border-radius: 6px;
+    padding: 1.1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.lib-socio-card__avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-family: Georgia, serif;
+    flex-shrink: 0;
+}
+.lib-socio-card__info { flex: 1; min-width: 0; }
+.lib-socio-card__info h4 { margin: 0 0 0.25rem; color: var(--vino-oscuro); font-size: 1rem; }
+.lib-socio-card__cedula, .lib-socio-card__telefono {
+    margin: 0.1rem 0;
+    font-size: 0.83rem;
+    color: #6d6259;
+}
+.lib-socio-card__acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex-shrink: 0;
+}
+.lib-socio-card__acciones .lib-btn-editar,
+.lib-socio-card__acciones .lib-btn-eliminar { width: 100%; text-align: center; }
+.lib-socio-card__acciones form { width: 100%; }
+
+/* ---------- Tarjetas de sede ---------- */
+.lib-sedes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.1rem;
+}
+.lib-sede-card {
+    background: #fff;
+    border-radius: 6px;
+    padding: 1.2rem;
+    border-top: 4px solid var(--vino-oscuro);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.lib-sede-card__cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+.lib-sede-card__icono { font-size: 1.6rem; }
+.lib-sede-card__badge {
+    background: #f1e3c8;
+    color: var(--vino-oscuro);
+    border: 1px solid var(--dorado);
+    border-radius: 12px;
+    padding: 0.15rem 0.65rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+.lib-sede-card h4 { margin: 0 0 0.3rem; color: var(--vino-oscuro); font-family: Georgia, serif; }
+.lib-sede-card__direccion { margin: 0 0 1rem; font-size: 0.85rem; color: #6d6259; }
+.lib-sede-card__acciones { display: flex; gap: 0.5rem; }
+.lib-sede-card__acciones .lib-btn-editar,
+.lib-sede-card__acciones .lib-btn-eliminar { flex: 1; text-align: center; }
+.lib-sede-card__acciones form { flex: 1; display: block; }
