@@ -57,6 +57,11 @@ if (!esCedulaEcuatorianaValida($cedula)) {
     exit();
 }
 
+if ($telefono !== '' && !preg_match('/^\d{7,15}$/', $telefono)) {
+    header('Location: ../socios.php?error=telefonoinvalido');
+    exit();
+}
+
 try {
     // La cédula no puede repetirse (la BD ya tiene UNIQUE, pero validamos
     // antes para dar un mensaje claro en vez de un error genérico de PDO)

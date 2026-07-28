@@ -41,6 +41,7 @@ $letras = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P',
             'camposobligatorios' => 'Cédula, nombre y apellido son obligatorios.',
             'ceduladuplicada'    => 'Ya existe un socio registrado con esa cédula.',
             'cedulanovalida'     => 'La cédula ingresada no es válida para Ecuador.',
+            'telefonoinvalido'   => 'El teléfono debe contener solo números y tener entre 7 y 15 dígitos.',
             'prestamosactivos'   => 'No se puede eliminar: este socio tiene préstamos activos (sin devolver).',
         ];
         $clave = $_GET['error'] ?? null;
@@ -144,7 +145,7 @@ $letras = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P',
                 <input type="text" id="so_apellido" name="so_apellido" required>
 
                 <label for="so_telefono">Teléfono</label>
-                <input type="text" id="so_telefono" name="so_telefono" maxlength="15">
+                <input type="text" id="so_telefono" name="so_telefono" maxlength="15" pattern="[0-9]{7,15}" inputmode="numeric" title="Debe contener solo números, entre 7 y 15 dígitos">
 
                 <button type="submit" class="lib-btn-primario" style="margin-top:1rem;">Guardar socio</button>
             </form>
