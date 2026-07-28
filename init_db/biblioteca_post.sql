@@ -1,10 +1,14 @@
+-- 1. Limpieza inicial de tablas (el orden no importa gracias al CASCADE)
 DROP TABLE IF EXISTS prestamo CASCADE;
+DROP TABLE IF EXISTS tag CASCADE;
 DROP TABLE IF EXISTS ejemplar CASCADE;
 DROP TABLE IF EXISTS socio CASCADE;
+DROP TABLE IF EXISTS genero CASCADE;
 DROP TABLE IF EXISTS libro CASCADE;
 DROP TABLE IF EXISTS sede_biblioteca CASCADE;
 DROP TABLE IF EXISTS usuario CASCADE;
 
+-- 2. Creación de tablas
 CREATE TABLE sede_biblioteca (
     id_sede SERIAL PRIMARY KEY,
     se_nombre VARCHAR(150) NOT NULL,
@@ -16,14 +20,28 @@ CREATE TABLE libro (
     li_titulo VARCHAR(200) NOT NULL,
     li_autor VARCHAR(150) NOT NULL,
     li_editorial VARCHAR(100),
-    li_genero VARCHAR(100)
+    li_genero VARCHAR(100) 
+);
+
+-- Tablas añadidas para compatibilidad con el sistema de géneros y etiquetas
+CREATE TABLE genero (
+    id_genero SERIAL PRIMARY KEY,
+    ge_nombre VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE tag (
+    id_tag SERIAL PRIMARY KEY,
+    id_libro INT NOT NULL,
+    id_genero INT NOT NULL,
+    FOREIGN KEY (id_libro) REFERENCES libro(id_libro) ON DELETE CASCADE,
+    FOREIGN KEY (id_genero) REFERENCES genero(id_genero) ON DELETE CASCADE
 );
 
 CREATE TABLE socio (
     id_socio SERIAL PRIMARY KEY,
     so_cedula VARCHAR(10) NOT NULL UNIQUE,
-    so_nombre VARCHAR(100) NOT NULL,
-    so_apellido VARCHAR(100) NOT NULL,
+    so_nombre VARCHAR(100) NOT NULL, 
+    so_apellido VARCHAR(100) NOT NULL, 
     so_telefono VARCHAR(15)
 );
 
@@ -40,7 +58,7 @@ CREATE TABLE prestamo (
     id_prestamo SERIAL PRIMARY KEY,
     id_ejemplar INT NOT NULL,
     id_socio INT NOT NULL,
-    pr_f_pres DATE NOT NULL DEFAULT CURRENT_DATE,
+    pr_f_pres DATE NOT NULL DEFAULT CURRENT_DATE, 
     pr_f_dev DATE,
     FOREIGN KEY (id_ejemplar) REFERENCES ejemplar(id_ejemplar) ON DELETE CASCADE,
     FOREIGN KEY (id_socio) REFERENCES socio(id_socio) ON DELETE CASCADE
@@ -50,10 +68,11 @@ CREATE TABLE usuario (
     id_usuario SERIAL PRIMARY KEY,
     us_usuario VARCHAR(50) NOT NULL UNIQUE,
     us_password_hash VARCHAR(255) NOT NULL,
-    us_rol VARCHAR(20) NOT NULL DEFAULT 'bibliotecario', -- 'admin' o 'bibliotecario'
+    us_rol VARCHAR(20) NOT NULL DEFAULT 'bibliotecario',
     us_estado SMALLINT NOT NULL DEFAULT 1
 );
 
+-- 3. Inserción de datos iniciales
 INSERT INTO usuario (us_usuario, us_password_hash, us_rol, us_estado) VALUES
 ('admin', '1234', 'admin', 1);
 
