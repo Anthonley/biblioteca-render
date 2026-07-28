@@ -1,4 +1,3 @@
--- 1. Limpieza inicial de tablas (el orden no importa gracias al CASCADE)
 DROP TABLE IF EXISTS prestamo CASCADE;
 DROP TABLE IF EXISTS tag CASCADE;
 DROP TABLE IF EXISTS ejemplar CASCADE;
@@ -8,7 +7,6 @@ DROP TABLE IF EXISTS libro CASCADE;
 DROP TABLE IF EXISTS sede_biblioteca CASCADE;
 DROP TABLE IF EXISTS usuario CASCADE;
 
--- 2. Creación de tablas
 CREATE TABLE sede_biblioteca (
     id_sede SERIAL PRIMARY KEY,
     se_nombre VARCHAR(150) NOT NULL,
@@ -23,7 +21,6 @@ CREATE TABLE libro (
     li_genero VARCHAR(100) 
 );
 
--- Tablas añadidas para compatibilidad con el sistema de géneros y etiquetas
 CREATE TABLE genero (
     id_genero SERIAL PRIMARY KEY,
     ge_nombre VARCHAR(100) NOT NULL UNIQUE
@@ -72,7 +69,6 @@ CREATE TABLE usuario (
     us_estado SMALLINT NOT NULL DEFAULT 1
 );
 
--- 3. Inserción de datos iniciales
 INSERT INTO usuario (us_usuario, us_password_hash, us_rol, us_estado) VALUES
 ('admin', '1234', 'admin', 1);
 
@@ -135,3 +131,23 @@ INSERT INTO prestamo (id_ejemplar, id_socio, pr_f_pres, pr_f_dev) VALUES
 (4, 8, '2026-04-10', '2026-04-20'), 
 (9, 9, '2026-07-22', NULL),         
 (8, 10, '2026-01-10', '2026-01-25');
+
+INSERT INTO genero (ge_nombre) VALUES
+('Ficción Mágica'),
+('Ciencia Ficción'),
+('Fantasía'),
+('Romance'),
+('Misterio'),
+('Novela Contemporánea');
+
+INSERT INTO tag (id_libro, id_genero) VALUES
+(1, 1),
+(2, 2),
+(3, 3),
+(4, 2),
+(5, 4),
+(6, 5),
+(7, 2),
+(8, 5),
+(9, 6),
+(10, 2);

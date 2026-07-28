@@ -40,6 +40,7 @@ $letras = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P',
         $mensajes = [
             'camposobligatorios' => 'Cédula, nombre y apellido son obligatorios.',
             'ceduladuplicada'    => 'Ya existe un socio registrado con esa cédula.',
+            'cedulanovalida'     => 'La cédula ingresada no es válida para Ecuador.',
             'prestamosactivos'   => 'No se puede eliminar: este socio tiene préstamos activos (sin devolver).',
         ];
         $clave = $_GET['error'] ?? null;
@@ -134,7 +135,7 @@ $letras = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P',
                 <input type="hidden" name="id_socio" id="id_socio" value="">
 
                 <label for="so_cedula">Cédula</label>
-                <input type="text" id="so_cedula" name="so_cedula" maxlength="10" required>
+                <input type="text" id="so_cedula" name="so_cedula" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" title="Debe ingresar 10 dígitos numéricos y un dígito verificador válido" required>
 
                 <label for="so_nombre">Nombre</label>
                 <input type="text" id="so_nombre" name="so_nombre" required>

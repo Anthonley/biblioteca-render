@@ -109,3 +109,23 @@ INSERT INTO prestamo (id_ejemplar, id_socio, pr_f_pres, pr_f_dev) VALUES
 (4, 8, '2026-04-10', '2026-04-20'), 
 (9, 9, '2026-07-22', NULL),         
 (8, 10, '2026-01-10', '2026-01-25');
+
+INSERT INTO genero (ge_nombre) VALUES
+('Ficción Mágica'),
+('Ciencia Ficción'),
+('Fantasía'),
+('Romance'),
+('Misterio'),
+('Novela Contemporánea');
+
+INSERT INTO tag (id_libro, id_genero) VALUES
+(1, 1),
+(2, 2),
+(3, 3),
+(4, 2),
+(5, 4),
+(6, 5),
+(7, 2),
+(8, 5),
+(9, 6),
+(10, 2);

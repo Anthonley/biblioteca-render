@@ -25,6 +25,38 @@ if ($cedula === '' || $nombre === '' || $apellido === '') {
     exit();
 }
 
+function esCedulaEcuatorianaValida(string $cedula): bool
+{
+    $cedula = trim($cedula);
+
+    if (!preg_match('/^\d{10}$/', $cedula)) {
+        return false;
+    }
+
+    $coeficientes = [2, 1, 2, 1, 2, 1, 2, 1, 2];
+    $suma = 0;
+
+    for ($i = 0; $i < 9; $i++) {
+        $digito = (int)$cedula[$i];
+        $producto = $digito * $coeficientes[$i];
+
+        if ($producto >= 10) {
+            $producto -= 9;
+        }
+
+        $suma += $producto;
+    }
+
+    $digitoVerificador = $suma % 10 === 0 ? 0 : 10 - ($suma % 10);
+
+    return $digitoVerificador === (int)$cedula[9];
+}
+
+if (!esCedulaEcuatorianaValida($cedula)) {
+    header('Location: ../socios.php?error=cedulanovalida');
+    exit();
+}
+
 try {
     // La cédula no puede repetirse (la BD ya tiene UNIQUE, pero validamos
     // antes para dar un mensaje claro en vez de un error genérico de PDO)
