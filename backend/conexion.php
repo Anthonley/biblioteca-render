@@ -1,14 +1,33 @@
 <?php
 declare(strict_types=1);
 
-// ---- Datos de conexión (local por ahora, MySQL) ----
-$host     = "127.0.0.1";
-$user     = "root";
-$password = "";
-$database = "bibliotecav2";
-$charset  = "utf8mb4";
+// ---- Datos de conexión (PostgreSQL) ----
+// En Render, la base de datos se conecta a través de la variable de entorno
+// DATABASE_URL (Render la genera sola al crear el Postgres). En local, si esa
+// variable no existe, usamos los valores de abajo (ajústalos a tu instalación).
+$urlConexion = getenv('DATABASE_URL');
 
-$dsn = "mysql:host=$host;dbname=$database;charset=$charset";
+if ($urlConexion) {
+    $partes = parse_url($urlConexion);
+    $host     = $partes['host'];
+    $port     = $partes['port'] ?? '5432';
+    $user     = $partes['user'];
+    $password = $partes['pass'];
+    $database = ltrim($partes['path'], '/');
+} else {
+    $host     = "127.0.0.1";
+    $port     = "5432";
+    $user     = "postgres";
+    $password = "";
+    $database = "biblioteca";
+}
+
+$dsn = "pgsql:host=$host;port=$port;dbname=$database";
+
+// Render exige SSL para conectarse a su Postgres desde fuera de su red interna
+if ($urlConexion) {
+    $dsn .= ";sslmode=require";
+}
 
 // Configuración de PDO
 $options = [

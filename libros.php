@@ -13,8 +13,8 @@ require_once 'backend/conexion.php';
 // Libros + sus géneros (concatenados) para la tabla
 $libros = $pdo->query(
     "SELECT l.id_libro, l.li_titulo, l.li_autor, l.li_editorial,
-            GROUP_CONCAT(g.ge_nombre ORDER BY g.ge_nombre SEPARATOR ', ') AS generos_nombres,
-            GROUP_CONCAT(g.id_genero ORDER BY g.id_genero SEPARATOR ',')  AS generos_ids
+            STRING_AGG(g.ge_nombre, ', ' ORDER BY g.ge_nombre) AS generos_nombres,
+            STRING_AGG(g.id_genero::text, ',' ORDER BY g.id_genero) AS generos_ids
      FROM libro l
      LEFT JOIN tag t ON t.id_libro = l.id_libro
      LEFT JOIN genero g ON g.id_genero = t.id_genero
