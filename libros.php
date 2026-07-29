@@ -12,7 +12,7 @@ require_once 'backend/conexion.php';
 
 // Libros + sus géneros (concatenados) para la tabla
 $libros = $pdo->query(
-    "SELECT l.id_libro, l.li_titulo, l.li_autor, l.li_editorial,
+    "SELECT l.id_libro, l.li_titulo, l.li_autor, l.li_editorial, l.li_isbn,
             STRING_AGG(g.ge_nombre, ', ' ORDER BY g.ge_nombre) AS generos_nombres,
             STRING_AGG(g.id_genero::text, ',' ORDER BY g.id_genero) AS generos_ids
      FROM libro l
@@ -24,6 +24,13 @@ $libros = $pdo->query(
 
 // Catálogo completo de géneros (para el <select> del modal)
 $generos = $pdo->query("SELECT id_genero, ge_nombre FROM genero ORDER BY ge_nombre")->fetchAll();
+
+// Siguiente ID sugerido (LI-0001, LI-0002, ...). El usuario puede editarlo
+// antes de guardar; se valida también del lado del servidor.
+$maxNum = (int) $pdo->query(
+    "SELECT COALESCE(MAX(CAST(SUBSTRING(id_libro FROM 4) AS INTEGER)), 0) FROM libro"
+)->fetchColumn();
+$siguienteIdLibro = 'LI-' . str_pad((string)($maxNum + 1), 4, '0', STR_PAD_LEFT);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -49,6 +56,11 @@ $generos = $pdo->query("SELECT id_genero, ge_nombre FROM genero ORDER BY ge_nomb
         $mensajes = [
             'prestamosactivos'  => ['tipo' => 'error', 'texto' => 'No se puede eliminar: este libro tiene préstamos activos (sin devolver).'],
             'camposobligatorios'=> ['tipo' => 'error', 'texto' => 'Título y autor son obligatorios.'],
+            'idinvalido'        => ['tipo' => 'error', 'texto' => 'El ID debe tener el formato LI-0000.'],
+            'idduplicado'       => ['tipo' => 'error', 'texto' => 'Ese ID ya existe, usa otro.'],
+            'autorinvalido'     => ['tipo' => 'error', 'texto' => 'El autor solo puede tener letras y espacios, con al menos 2 letras.'],
+            'editorialinvalida' => ['tipo' => 'error', 'texto' => 'La editorial solo puede tener letras y espacios, con al menos 2 letras.'],
+            'isbninvalido'      => ['tipo' => 'error', 'texto' => 'El ISBN no es válido (debe tener 10 o 13 dígitos).'],
             'generovacio'       => ['tipo' => 'error', 'texto' => 'El nombre del género no puede estar vacío.'],
             'generoduplicado'   => ['tipo' => 'error', 'texto' => 'Ese género ya existe.'],
             'generocreado'      => ['tipo' => 'ok',    'texto' => 'Género creado correctamente.'],
@@ -67,9 +79,11 @@ $generos = $pdo->query("SELECT id_genero, ge_nombre FROM genero ORDER BY ge_nomb
             <table class="lib-tabla">
                 <thead>
                     <tr>
+                        <th>ID</th>
                         <th>Título</th>
                         <th>Autor</th>
                         <th>Editorial</th>
+                        <th>ISBN</th>
                         <th>Géneros</th>
                         <th>Acciones</th>
                     </tr>
@@ -77,9 +91,11 @@ $generos = $pdo->query("SELECT id_genero, ge_nombre FROM genero ORDER BY ge_nomb
                 <tbody>
                     <?php foreach ($libros as $libro): ?>
                     <tr>
+                        <td><?= htmlspecialchars($libro['id_libro']) ?></td>
                         <td><?= htmlspecialchars($libro['li_titulo']) ?></td>
                         <td><?= htmlspecialchars($libro['li_autor']) ?></td>
                         <td><?= htmlspecialchars($libro['li_editorial'] ?? '—') ?></td>
+                        <td><?= htmlspecialchars($libro['li_isbn'] ?? '—') ?></td>
                         <td>
                             <?php if ($libro['generos_nombres']): ?>
                                 <?php foreach (explode(', ', $libro['generos_nombres']) as $g): ?>
@@ -92,16 +108,17 @@ $generos = $pdo->query("SELECT id_genero, ge_nombre FROM genero ORDER BY ge_nomb
                         <td class="lib-acciones">
                             <button type="button" class="lib-btn-editar"
                                 onclick="abrirModalEditar(
-                                    <?= (int)$libro['id_libro'] ?>,
+                                    '<?= htmlspecialchars($libro['id_libro'], ENT_QUOTES) ?>',
                                     '<?= htmlspecialchars($libro['li_titulo'], ENT_QUOTES) ?>',
                                     '<?= htmlspecialchars($libro['li_autor'], ENT_QUOTES) ?>',
                                     '<?= htmlspecialchars($libro['li_editorial'] ?? '', ENT_QUOTES) ?>',
+                                    '<?= htmlspecialchars($libro['li_isbn'] ?? '', ENT_QUOTES) ?>',
                                     '<?= $libro['generos_ids'] ?? '' ?>'
                                 )">Editar</button>
 
                             <form action="backend/libros_eliminar.php" method="POST" class="lib-form-inline"
                                   onsubmit="return confirm('¿Eliminar este libro? Esto también eliminará sus ejemplares y préstamos asociados.');">
-                                <input type="hidden" name="id_libro" value="<?= (int)$libro['id_libro'] ?>">
+                                <input type="hidden" name="id_libro" value="<?= htmlspecialchars($libro['id_libro'], ENT_QUOTES) ?>">
                                 <button type="submit" class="lib-btn-eliminar">Eliminar</button>
                             </form>
                         </td>
@@ -122,16 +139,28 @@ $generos = $pdo->query("SELECT id_genero, ge_nombre FROM genero ORDER BY ge_nomb
             </div>
 
             <form id="formLibro" action="backend/libros_guardar.php" method="POST">
-                <input type="hidden" name="id_libro" id="id_libro" value="">
+                <input type="hidden" name="id_libro_original" id="id_libro_original" value="">
+
+                <label for="id_libro">ID</label>
+                <input type="text" id="id_libro" name="id_libro" required
+                       pattern="LI-\d{4}" maxlength="7"
+                       value="<?= htmlspecialchars($siguienteIdLibro) ?>">
+                <p class="lib-ayuda">Formato LI-0000. Al editar no se puede cambiar.</p>
 
                 <label for="li_titulo">Título</label>
                 <input type="text" id="li_titulo" name="li_titulo" required>
 
                 <label for="li_autor">Autor</label>
-                <input type="text" id="li_autor" name="li_autor" required>
+                <input type="text" id="li_autor" name="li_autor" placeholder="Dejar vacío = Anónimo">
+                <p class="lib-ayuda">Si lo escribes, solo letras y espacios (mínimo 2 letras). Vacío se guarda como "Anónimo".</p>
 
                 <label for="li_editorial">Editorial</label>
                 <input type="text" id="li_editorial" name="li_editorial">
+                <p class="lib-ayuda">Si lo escribes, solo letras y espacios (mínimo 2 letras). Puede dejarse vacío.</p>
+
+                <label for="li_isbn">ISBN</label>
+                <input type="text" id="li_isbn" name="li_isbn" placeholder="Ej. 978-0-441-01359-3">
+                <p class="lib-ayuda">Opcional. 10 o 13 dígitos (se ignoran guiones).</p>
 
                 <label>Géneros</label>
                 <div class="lib-generos-selector">
@@ -145,6 +174,8 @@ $generos = $pdo->query("SELECT id_genero, ge_nombre FROM genero ORDER BY ge_nomb
 
                 <div id="listaTags" class="lib-tags-lista"></div>
                 <div id="tagsHidden"></div>
+
+                <p id="errorFormLibro" class="lib-alerta" style="display:none;"></p>
 
                 <button type="submit" class="lib-btn-primario" style="margin-top:1.2rem;">Guardar libro</button>
             </form>
@@ -221,21 +252,30 @@ $generos = $pdo->query("SELECT id_genero, ge_nombre FROM genero ORDER BY ge_nomb
             document.getElementById('modalLibro').classList.remove('lib-modal-fondo--visible');
         }
 
+        const siguienteIdLibro = <?= json_encode($siguienteIdLibro, JSON_UNESCAPED_UNICODE) ?>;
+
         function abrirModalNuevo() {
             document.getElementById('modalTitulo').textContent = 'Agregar libro';
             document.getElementById('formLibro').reset();
-            document.getElementById('id_libro').value = '';
+            document.getElementById('id_libro_original').value = '';
+            document.getElementById('id_libro').value = siguienteIdLibro;
+            document.getElementById('id_libro').readOnly = false;
+            ocultarErrorLibro();
             tagsSeleccionados = [];
             renderTags();
             abrirModal();
         }
 
-        function abrirModalEditar(id, titulo, autor, editorial, generosIdsCsv) {
+        function abrirModalEditar(id, titulo, autor, editorial, isbn, generosIdsCsv) {
             document.getElementById('modalTitulo').textContent = 'Editar libro';
+            document.getElementById('id_libro_original').value = id;
             document.getElementById('id_libro').value = id;
+            document.getElementById('id_libro').readOnly = true;
             document.getElementById('li_titulo').value = titulo;
             document.getElementById('li_autor').value = autor;
             document.getElementById('li_editorial').value = editorial;
+            document.getElementById('li_isbn').value = isbn;
+            ocultarErrorLibro();
 
             tagsSeleccionados = generosIdsCsv
                 ? generosIdsCsv.split(',').map(v => parseInt(v, 10))
@@ -251,6 +291,63 @@ $generos = $pdo->query("SELECT id_genero, ge_nombre FROM genero ORDER BY ge_nomb
         function cerrarModalGenero() {
             document.getElementById('modalGenero').classList.remove('lib-modal-fondo--visible');
         }
+
+        // ---------- Validación antes de enviar ----------
+        const soloLetras = /^[A-Za-zÀ-ÖØ-öø-ÿñÑ\s]+$/;
+
+        function contarLetras(texto) {
+            return (texto.match(/[A-Za-zÀ-ÖØ-öø-ÿñÑ]/g) || []).length;
+        }
+
+        function mostrarErrorLibro(mensaje) {
+            const p = document.getElementById('errorFormLibro');
+            p.textContent = mensaje;
+            p.style.display = 'block';
+        }
+
+        function ocultarErrorLibro() {
+            const p = document.getElementById('errorFormLibro');
+            p.style.display = 'none';
+            p.textContent = '';
+        }
+
+        document.getElementById('formLibro').addEventListener('submit', function (e) {
+            ocultarErrorLibro();
+
+            const id = document.getElementById('id_libro').value.trim();
+            const titulo = document.getElementById('li_titulo').value.trim();
+            const autor = document.getElementById('li_autor').value.trim();
+            const editorial = document.getElementById('li_editorial').value.trim();
+            const isbn = document.getElementById('li_isbn').value.trim();
+
+            if (!/^LI-\d{4}$/.test(id)) {
+                e.preventDefault();
+                return mostrarErrorLibro('El ID debe tener el formato LI-0000.');
+            }
+
+            if (titulo === '') {
+                e.preventDefault();
+                return mostrarErrorLibro('El título no puede quedar vacío.');
+            }
+
+            if (autor !== '' && (!soloLetras.test(autor) || contarLetras(autor) < 2)) {
+                e.preventDefault();
+                return mostrarErrorLibro('El autor solo puede tener letras y espacios, con al menos 2 letras (o déjalo vacío para "Anónimo").');
+            }
+
+            if (editorial !== '' && (!soloLetras.test(editorial) || contarLetras(editorial) < 2)) {
+                e.preventDefault();
+                return mostrarErrorLibro('La editorial solo puede tener letras y espacios, con al menos 2 letras (o déjala vacía).');
+            }
+
+            if (isbn !== '') {
+                const isbnLimpio = isbn.replace(/[\s-]/g, '');
+                if (!/^\d{9}[\dXx]$/.test(isbnLimpio) && !/^\d{13}$/.test(isbnLimpio)) {
+                    e.preventDefault();
+                    return mostrarErrorLibro('El ISBN no es válido (debe tener 10 o 13 dígitos).');
+                }
+            }
+        });
     </script>
 </body>
 </html>

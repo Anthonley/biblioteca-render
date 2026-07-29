@@ -84,7 +84,7 @@ $estados = ['Disponible', 'En Reparación', 'Extraviado'];
                             <button type="button" class="lib-btn-editar"
                                 onclick="abrirModalEditar(
                                     <?= (int)$ej['id_ejemplar'] ?>,
-                                    <?= (int)$ej['id_libro'] ?>,
+                                    '<?= htmlspecialchars($ej['id_libro'], ENT_QUOTES) ?>',
                                     <?= (int)$ej['id_sede'] ?>,
                                     '<?= htmlspecialchars($ej['ej_estado'], ENT_QUOTES) ?>'
                                 )">Editar</button>
@@ -118,7 +118,7 @@ $estados = ['Disponible', 'En Reparación', 'Extraviado'];
                 <label for="id_libro">Libro</label>
                 <select id="id_libro" name="id_libro" required>
                     <?php foreach ($libros as $l): ?>
-                        <option value="<?= (int)$l['id_libro'] ?>"><?= htmlspecialchars($l['li_titulo']) ?></option>
+                        <option value="<?= htmlspecialchars($l['id_libro'], ENT_QUOTES) ?>"><?= htmlspecialchars($l['li_titulo']) ?></option>
                     <?php endforeach; ?>
                 </select>
 

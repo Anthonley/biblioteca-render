@@ -17,12 +17,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $estadosValidos = ['Disponible', 'Prestado', 'En Reparación', 'Extraviado'];
 
 $idEjemplar = trim($_POST['id_ejemplar'] ?? '');
-$idLibro    = (int)($_POST['id_libro'] ?? 0);
+$idLibro    = trim($_POST['id_libro'] ?? '');
 $idSede     = (int)($_POST['id_sede'] ?? 0);
 $estado     = trim($_POST['ej_estado'] ?? '');
 $cantidad   = max(1, min(50, (int)($_POST['cantidad'] ?? 1)));
 
-if (!$idLibro || !$idSede || !in_array($estado, $estadosValidos, true)) {
+if ($idLibro === '' || !$idSede || !in_array($estado, $estadosValidos, true)) {
     header('Location: ../ejemplares.php?error=camposobligatorios');
     exit();
 }

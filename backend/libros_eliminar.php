@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['id_libro'])) {
     exit();
 }
 
-$idLibro = (int)$_POST['id_libro'];
+$idLibro = trim($_POST['id_libro']);
 
 try {
     // No permitir borrar si alguno de sus ejemplares tiene un préstamo activo (sin devolver)

@@ -378,6 +378,10 @@ h1, h2, h3, .lib-navbar__brand h1 {
     border-radius: 3px;
     background: #fff;
 }
+.lib-modal form input[type="text"]:read-only {
+    background: #f0e6d8;
+    color: #6d6259;
+}
 
 .lib-generos-selector { display: flex; gap: 0.5rem; margin-top: 0.3rem; }
 .lib-generos-selector select { flex: 1; margin-top: 0; }
