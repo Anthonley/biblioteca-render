@@ -56,7 +56,7 @@ $siguienteIdLibro = 'LI-' . str_pad((string)($maxNum + 1), 4, '0', STR_PAD_LEFT)
         $mensajes = [
             'prestamosactivos'  => ['tipo' => 'error', 'texto' => 'No se puede eliminar: este libro tiene préstamos activos (sin devolver).'],
             'camposobligatorios'=> ['tipo' => 'error', 'texto' => 'Título y autor son obligatorios.'],
-            'idinvalido'        => ['tipo' => 'error', 'texto' => 'El ID debe tener el formato LI-0000.'],
+            'idinvalido'        => ['tipo' => 'error', 'texto' => 'El ID debe ser un número de hasta 4 dígitos (ej. 7 → LI-0007).'],
             'idduplicado'       => ['tipo' => 'error', 'texto' => 'Ese ID ya existe, usa otro.'],
             'autorinvalido'     => ['tipo' => 'error', 'texto' => 'El autor solo puede tener letras y espacios, con al menos 2 letras.'],
             'editorialinvalida' => ['tipo' => 'error', 'texto' => 'La editorial solo puede tener letras y espacios, con al menos 2 letras.'],
@@ -143,20 +143,17 @@ $siguienteIdLibro = 'LI-' . str_pad((string)($maxNum + 1), 4, '0', STR_PAD_LEFT)
 
                 <label for="id_libro">ID</label>
                 <input type="text" id="id_libro" name="id_libro" required
-                       pattern="LI-\d{4}" maxlength="7"
+                       maxlength="7" placeholder="LI-0000"
                        value="<?= htmlspecialchars($siguienteIdLibro) ?>">
-                <p class="lib-ayuda">Formato LI-0000. Al editar no se puede cambiar.</p>
 
                 <label for="li_titulo">Título</label>
                 <input type="text" id="li_titulo" name="li_titulo" required>
 
                 <label for="li_autor">Autor</label>
                 <input type="text" id="li_autor" name="li_autor" placeholder="Dejar vacío = Anónimo">
-                <p class="lib-ayuda">Si lo escribes, solo letras y espacios (mínimo 2 letras). Vacío se guarda como "Anónimo".</p>
 
                 <label for="li_editorial">Editorial</label>
-                <input type="text" id="li_editorial" name="li_editorial">
-                <p class="lib-ayuda">Si lo escribes, solo letras y espacios (mínimo 2 letras). Puede dejarse vacío.</p>
+                <input type="text" id="li_editorial" name="li_editorial" placeholder="Opcional">
 
                 <label for="li_isbn">ISBN</label>
                 <input type="text" id="li_isbn" name="li_isbn" placeholder="Ej. 978-0-441-01359-3">
@@ -299,6 +296,16 @@ $siguienteIdLibro = 'LI-' . str_pad((string)($maxNum + 1), 4, '0', STR_PAD_LEFT)
             return (texto.match(/[A-Za-zÀ-ÖØ-öø-ÿñÑ]/g) || []).length;
         }
 
+        // Acepta "LI-0007", "li-7" o solo "7" y siempre devuelve "LI-0007".
+        // Devuelve null si no es válido (vacío o más de 4 dígitos).
+        function normalizarIdLibro(valorCrudo) {
+            let v = valorCrudo.trim().toUpperCase();
+            if (v.startsWith('LI-')) v = v.slice(3);
+            v = v.replace(/\D/g, '');
+            if (v === '' || v.length > 4) return null;
+            return 'LI-' + v.padStart(4, '0');
+        }
+
         function mostrarErrorLibro(mensaje) {
             const p = document.getElementById('errorFormLibro');
             p.textContent = mensaje;
@@ -314,16 +321,18 @@ $siguienteIdLibro = 'LI-' . str_pad((string)($maxNum + 1), 4, '0', STR_PAD_LEFT)
         document.getElementById('formLibro').addEventListener('submit', function (e) {
             ocultarErrorLibro();
 
-            const id = document.getElementById('id_libro').value.trim();
+            const idInput = document.getElementById('id_libro');
+            const idNormalizado = normalizarIdLibro(idInput.value);
+            if (!idNormalizado) {
+                e.preventDefault();
+                return mostrarErrorLibro('El ID debe ser un número de hasta 4 dígitos (ej. 7 → LI-0007).');
+            }
+            idInput.value = idNormalizado;
+
             const titulo = document.getElementById('li_titulo').value.trim();
             const autor = document.getElementById('li_autor').value.trim();
             const editorial = document.getElementById('li_editorial').value.trim();
             const isbn = document.getElementById('li_isbn').value.trim();
-
-            if (!/^LI-\d{4}$/.test(id)) {
-                e.preventDefault();
-                return mostrarErrorLibro('El ID debe tener el formato LI-0000.');
-            }
 
             if (titulo === '') {
                 e.preventDefault();

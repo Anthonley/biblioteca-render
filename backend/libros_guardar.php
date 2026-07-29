@@ -24,11 +24,18 @@ $generos         = $_POST['generos'] ?? []; // array de id_genero
 
 $esEdicion = $idLibroOriginal !== '';
 
-// ---- ID: formato LI-0000, obligatorio ----
-if (!preg_match('/^LI-\d{4}$/', $idLibro)) {
+// ---- ID: acepta "LI-0007", "li-7" o solo "7"; siempre se guarda como LI-0000 ----
+$idNormalizado = strtoupper($idLibro);
+if (str_starts_with($idNormalizado, 'LI-')) {
+    $idNormalizado = substr($idNormalizado, 3);
+}
+$idNormalizado = preg_replace('/\D/', '', $idNormalizado);
+
+if ($idNormalizado === '' || strlen($idNormalizado) > 4) {
     header('Location: ../libros.php?error=idinvalido');
     exit();
 }
+$idLibro = 'LI-' . str_pad($idNormalizado, 4, '0', STR_PAD_LEFT);
 
 // ---- Título: obligatorio, puede ser cualquier texto ----
 if ($titulo === '') {

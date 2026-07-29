@@ -62,6 +62,7 @@ $estados = ['Disponible', 'En Reparación', 'Extraviado'];
             <table class="lib-tabla">
                 <thead>
                     <tr>
+                        <th>ID</th>
                         <th>Libro</th>
                         <th>Sede</th>
                         <th>Estado</th>
@@ -71,6 +72,7 @@ $estados = ['Disponible', 'En Reparación', 'Extraviado'];
                 <tbody>
                     <?php foreach ($ejemplares as $ej): ?>
                     <tr>
+                        <td><?= (int)$ej['id_ejemplar'] ?></td>
                         <td><?= htmlspecialchars($ej['li_titulo']) ?></td>
                         <td><?= htmlspecialchars($ej['se_nombre']) ?></td>
                         <td><span class="lib-estado lib-estado--<?= strtolower(str_replace(' ', '-', $ej['ej_estado'])) ?>"><?= htmlspecialchars($ej['ej_estado']) ?></span></td>
@@ -139,7 +141,6 @@ $estados = ['Disponible', 'En Reparación', 'Extraviado'];
                 <div id="grupoCantidad">
                     <label for="cantidad">Cantidad de copias a crear</label>
                     <input type="number" id="cantidad" name="cantidad" min="1" max="50" value="1">
-                    <p class="lib-ayuda">Crea varias copias idénticas de una sola vez (mismo libro, sede y estado).</p>
                 </div>
 
                 <button type="submit" class="lib-btn-primario" style="margin-top:1rem;">Guardar</button>
