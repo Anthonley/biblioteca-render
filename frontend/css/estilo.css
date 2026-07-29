@@ -142,6 +142,98 @@ h1, h2, h3, .lib-navbar__brand h1 {
 .lib-bienvenida h2 { color: var(--vino-oscuro); margin-bottom: 0.5rem; }
 .lib-bienvenida p { color: #6d6259; }
 
+/* ---------- Dashboard: tarjetas de estadísticas ---------- */
+.lib-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+.lib-stat-card {
+    background: #fff;
+    border-radius: 6px;
+    padding: 1.1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    border-left: 5px solid var(--dorado);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.lib-stat-card__icono { font-size: 1.7rem; line-height: 1; }
+.lib-stat-card__valor {
+    display: block;
+    font-family: Georgia, serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--vino-oscuro);
+    line-height: 1.1;
+}
+.lib-stat-card__etiqueta {
+    display: block;
+    font-size: 0.8rem;
+    color: #6d6259;
+}
+
+/* ---------- Dashboard: paneles ---------- */
+.lib-paneles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.1rem;
+}
+.lib-panel {
+    background: #fff;
+    border-radius: 6px;
+    padding: 1.2rem 1.3rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.lib-panel h3 {
+    margin: 0 0 1rem;
+    color: var(--vino-oscuro);
+    font-size: 1rem;
+}
+
+.lib-barra-lista { list-style: none; margin: 0; padding: 0; }
+.lib-barra-item + .lib-barra-item { margin-top: 0.9rem; }
+.lib-barra-item__cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-bottom: 0.3rem;
+}
+.lib-barra-fondo {
+    background: #f0e6d8;
+    border-radius: 6px;
+    height: 8px;
+    overflow: hidden;
+}
+.lib-barra-relleno {
+    background: var(--vino-medio);
+    height: 100%;
+    border-radius: 6px;
+}
+
+.lib-ranking-lista { list-style: decimal; margin: 0; padding-left: 1.2rem; }
+.lib-ranking-lista li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.4rem 0;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #f0e6d8;
+}
+.lib-ranking-lista li:last-child { border-bottom: none; }
+.lib-ranking-lista__valor {
+    background: #f1e3c8;
+    color: var(--vino-oscuro);
+    border-radius: 10px;
+    padding: 0.05rem 0.55rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
 /* ---------- Encabezado de sección ---------- */
 .lib-cabecera-seccion {
     display: flex;
@@ -303,6 +395,7 @@ h1, h2, h3, .lib-navbar__brand h1 {
 .lib-estado--disponible    { background: #e6f2df; color: #365b28; }
 .lib-estado--prestado      { background: #fdecd2; color: #8a5a00; }
 .lib-estado--en-reparación { background: #dfe7f5; color: #2c4a82; }
+.lib-estado--extraviado    { background: #f3d9dc; color: #8a2432; }
 .lib-btn-editar--deshabilitado {
     background: #e4ddcf;
     color: #9c8f81;
