@@ -275,6 +275,7 @@ h1, h2, h3, .lib-navbar__brand h1 {
 .lib-tabla th, .lib-tabla td {
     padding: 0.75rem 1rem;
     text-align: left;
+    vertical-align: middle;
     border-bottom: 1px solid #f0e6d8;
     font-size: 0.92rem;
 }

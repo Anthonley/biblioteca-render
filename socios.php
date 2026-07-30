@@ -256,15 +256,23 @@ $letras = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P',
                 body: datos,
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
-                .then(resp => resp.json())
-                .then(data => {
+                .then(resp => resp.text().then(texto => ({ status: resp.status, texto })))
+                .then(({ status, texto }) => {
+                    let data;
+                    try {
+                        data = JSON.parse(texto);
+                    } catch (err) {
+                        console.error('Respuesta no era JSON (status ' + status + '):', texto);
+                        return mostrarErrorSocio('El servidor respondió algo inesperado (código ' + status + '). Revisa la consola para más detalle.');
+                    }
                     if (data.ok) {
                         window.location.href = 'socios.php';
                     } else {
                         mostrarErrorSocio(data.mensaje || 'No se pudo guardar el socio.');
                     }
                 })
-                .catch(() => {
+                .catch(err => {
+                    console.error('Error de red al guardar el socio:', err);
                     mostrarErrorSocio('Ocurrió un error de conexión. Inténtalo de nuevo.');
                 });
         });
