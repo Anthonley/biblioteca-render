@@ -370,13 +370,15 @@ h1, h2, h3, .lib-navbar__brand h1 {
     font-size: 0.88rem;
     margin-top: 0.8rem;
 }
-.lib-modal form input[type="text"], .lib-modal form select {
+.lib-modal form input[type="text"], .lib-modal form input[type="email"], .lib-modal form select {
     width: 100%;
     padding: 0.5rem 0.65rem;
     margin-top: 0.3rem;
     border: 1px solid #cbbfa8;
     border-radius: 3px;
     background: #fff;
+    font: inherit;
+    box-sizing: border-box;
 }
 .lib-modal form input[type="text"]:read-only {
     background: #f0e6d8;
@@ -537,10 +539,12 @@ h1, h2, h3, .lib-navbar__brand h1 {
     background: #fff;
     border-radius: 6px;
     padding: 1.1rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 0.9rem;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.lib-socio-card__cabecera {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
 }
 .lib-socio-card__avatar {
     width: 46px;
@@ -554,22 +558,49 @@ h1, h2, h3, .lib-navbar__brand h1 {
     font-family: Georgia, serif;
     flex-shrink: 0;
 }
-.lib-socio-card__info { flex: 1; min-width: 0; }
-.lib-socio-card__info h4 { margin: 0 0 0.25rem; color: var(--vino-oscuro); font-size: 1rem; }
-.lib-socio-card__cedula, .lib-socio-card__telefono, .lib-socio-card__correo {
-    margin: 0.1rem 0;
-    font-size: 0.83rem;
-    color: #6d6259;
+.lib-socio-card__nombre {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+}
+.lib-socio-card__nombre span {
+    color: var(--vino-oscuro);
+    font-weight: 700;
+    font-size: 1rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .lib-socio-card__acciones {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.35rem;
     flex-shrink: 0;
 }
 .lib-socio-card__acciones .lib-btn-editar,
-.lib-socio-card__acciones .lib-btn-eliminar { width: 100%; text-align: center; }
+.lib-socio-card__acciones .lib-btn-eliminar {
+    width: 100%;
+    text-align: center;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.78rem;
+}
 .lib-socio-card__acciones form { width: 100%; }
+.lib-socio-card__separador {
+    border: none;
+    border-top: 1px solid #ece1cf;
+    margin: 0.9rem 0 0.7rem;
+}
+.lib-socio-card__datos p {
+    margin: 0.2rem 0;
+    font-size: 0.85rem;
+    color: #6d6259;
+}
+.lib-socio-card__etiqueta {
+    font-weight: 600;
+    color: #4a4038;
+}
 
 /* ---------- Tarjetas de sede ---------- */
 .lib-sedes-grid {

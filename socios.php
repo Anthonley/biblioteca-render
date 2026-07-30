@@ -90,29 +90,37 @@ $letras = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P',
                  data-nombre-inicial="<?= htmlspecialchars($inicialNombre) ?>"
                  data-apellido-inicial="<?= htmlspecialchars($apellidoInicial) ?>"
                  data-busqueda="<?= htmlspecialchars($busqueda) ?>">
-                <div class="lib-socio-card__avatar" style="background: <?= $color ?>;"><?= htmlspecialchars($iniciales) ?></div>
-                <div class="lib-socio-card__info">
-                    <h4><?= htmlspecialchars($s['so_nombre'] . ' ' . $s['so_apellido']) ?></h4>
-                    <p class="lib-socio-card__cedula">Cédula: <?= htmlspecialchars($s['so_cedula']) ?></p>
-                    <p class="lib-socio-card__telefono"><?= htmlspecialchars($s['so_telefono'] ?? 'Sin teléfono registrado') ?></p>
-                    <p class="lib-socio-card__correo"><?= htmlspecialchars($s['so_correo']) ?></p>
-                </div>
-                <div class="lib-socio-card__acciones">
-                    <button type="button" class="lib-btn-editar"
-                        onclick="abrirModalEditar(
-                            '<?= htmlspecialchars($s['id_socio'], ENT_QUOTES) ?>',
-                            '<?= htmlspecialchars($s['so_cedula'], ENT_QUOTES) ?>',
-                            '<?= htmlspecialchars($s['so_nombre'], ENT_QUOTES) ?>',
-                            '<?= htmlspecialchars($s['so_apellido'], ENT_QUOTES) ?>',
-                            '<?= htmlspecialchars($s['so_telefono'] ?? '', ENT_QUOTES) ?>',
-                            '<?= htmlspecialchars($s['so_correo'], ENT_QUOTES) ?>'
-                        )">Editar</button>
+                <div class="lib-socio-card__cabecera">
+                    <div class="lib-socio-card__avatar" style="background: <?= $color ?>;"><?= htmlspecialchars($iniciales) ?></div>
+                    <div class="lib-socio-card__nombre">
+                        <span><?= htmlspecialchars($s['so_nombre']) ?></span>
+                        <span><?= htmlspecialchars($s['so_apellido']) ?></span>
+                    </div>
+                    <div class="lib-socio-card__acciones">
+                        <button type="button" class="lib-btn-editar"
+                            onclick="abrirModalEditar(
+                                '<?= htmlspecialchars($s['id_socio'], ENT_QUOTES) ?>',
+                                '<?= htmlspecialchars($s['so_cedula'], ENT_QUOTES) ?>',
+                                '<?= htmlspecialchars($s['so_nombre'], ENT_QUOTES) ?>',
+                                '<?= htmlspecialchars($s['so_apellido'], ENT_QUOTES) ?>',
+                                '<?= htmlspecialchars($s['so_telefono'] ?? '', ENT_QUOTES) ?>',
+                                '<?= htmlspecialchars($s['so_correo'], ENT_QUOTES) ?>'
+                            )">Editar</button>
 
-                    <form action="backend/socios_eliminar.php" method="POST" class="lib-form-inline"
-                          onsubmit="return confirm('¿Eliminar este socio?');">
-                        <input type="hidden" name="id_socio" value="<?= htmlspecialchars($s['id_socio'], ENT_QUOTES) ?>">
-                        <button type="submit" class="lib-btn-eliminar">Eliminar</button>
-                    </form>
+                        <form action="backend/socios_eliminar.php" method="POST" class="lib-form-inline"
+                              onsubmit="return confirm('¿Eliminar este socio?');">
+                            <input type="hidden" name="id_socio" value="<?= htmlspecialchars($s['id_socio'], ENT_QUOTES) ?>">
+                            <button type="submit" class="lib-btn-eliminar">Eliminar</button>
+                        </form>
+                    </div>
+                </div>
+
+                <hr class="lib-socio-card__separador">
+
+                <div class="lib-socio-card__datos">
+                    <p><span class="lib-socio-card__etiqueta">Cédula:</span> <?= htmlspecialchars($s['so_cedula']) ?></p>
+                    <p><span class="lib-socio-card__etiqueta">Teléfono:</span> <?= htmlspecialchars($s['so_telefono'] ?? 'Sin registrar') ?></p>
+                    <p><span class="lib-socio-card__etiqueta">Correo:</span> <?= htmlspecialchars($s['so_correo']) ?></p>
                 </div>
             </div>
             <?php endforeach; ?>
