@@ -63,6 +63,7 @@ CREATE TABLE ejemplar (
 
 -- id_prestamo ahora es manual con formato PR-0000 (ver prestamos.php / prestamos_guardar.php)
 -- id_ejemplar/id_socio son VARCHAR porque referencian los nuevos IDs con prefijo
+-- pr_estado_devolucion y pr_multa se llenan solo al devolver (ver prestamos_devolver.php)
 CREATE TABLE prestamo (
     id_prestamo VARCHAR(10) PRIMARY KEY,
     id_ejemplar VARCHAR(10) NOT NULL,
@@ -70,6 +71,8 @@ CREATE TABLE prestamo (
     pr_f_pres DATE NOT NULL DEFAULT CURRENT_DATE,
     pr_f_dev_esperada DATE NOT NULL,
     pr_f_dev_real DATE,
+    pr_estado_devolucion VARCHAR(20),
+    pr_multa NUMERIC(8,2) NOT NULL DEFAULT 0,
     FOREIGN KEY (id_ejemplar) REFERENCES ejemplar(id_ejemplar) ON DELETE CASCADE,
     FOREIGN KEY (id_socio) REFERENCES socio(id_socio) ON DELETE CASCADE
 );
@@ -124,27 +127,32 @@ INSERT INTO socio (id_socio, so_cedula, so_nombre, so_apellido, so_telefono, so_
 
 INSERT INTO ejemplar (id_ejemplar, id_libro, id_sede, ej_estado) VALUES
 ('EJ-0001', 'LI-0001', 'SE-0001', 'Disponible'),
-('EJ-0002', 'LI-0002', 'SE-0001', 'Prestado'),
+('EJ-0002', 'LI-0002', 'SE-0001', 'Disponible'),
 ('EJ-0003', 'LI-0003', 'SE-0002', 'Disponible'),
-('EJ-0004', 'LI-0004', 'SE-0003', 'En Reparación'),
-('EJ-0005', 'LI-0005', 'SE-0004', 'Disponible'),
+('EJ-0004', 'LI-0004', 'SE-0003', 'Extraviado'),
+('EJ-0005', 'LI-0005', 'SE-0004', 'En Reparación'),
 ('EJ-0006', 'LI-0006', 'SE-0005', 'Prestado'),
-('EJ-0007', 'LI-0007', 'SE-0006', 'Disponible'),
-('EJ-0008', 'LI-0008', 'SE-0007', 'Extraviado'),
-('EJ-0009', 'LI-0009', 'SE-0008', 'Disponible'),
+('EJ-0007', 'LI-0007', 'SE-0006', 'Prestado'),
+('EJ-0008', 'LI-0008', 'SE-0007', 'Disponible'),
+('EJ-0009', 'LI-0009', 'SE-0008', 'Prestado'),
 ('EJ-0010', 'LI-0010', 'SE-0009', 'Prestado');
 
-INSERT INTO prestamo (id_prestamo, id_ejemplar, id_socio, pr_f_pres, pr_f_dev_esperada, pr_f_dev_real) VALUES
-('PR-0001', 'EJ-0002', 'SO-0001', '2026-07-01', '2026-07-10', '2026-07-10'),
-('PR-0002', 'EJ-0006', 'SO-0002', '2026-07-05', '2026-08-05', NULL),
-('PR-0003', 'EJ-0010', 'SO-0003', '2026-07-15', '2026-08-15', NULL),
-('PR-0004', 'EJ-0001', 'SO-0004', '2026-06-10', '2026-06-20', '2026-06-20'),
-('PR-0005', 'EJ-0003', 'SO-0005', '2026-06-25', '2026-07-02', '2026-07-02'),
-('PR-0006', 'EJ-0005', 'SO-0006', '2026-05-15', '2026-05-30', '2026-05-30'),
-('PR-0007', 'EJ-0007', 'SO-0007', '2026-07-20', '2026-08-20', NULL),
-('PR-0008', 'EJ-0004', 'SO-0008', '2026-04-10', '2026-04-20', '2026-04-20'),
-('PR-0009', 'EJ-0009', 'SO-0009', '2026-07-22', '2026-08-22', NULL),
-('PR-0010', 'EJ-0008', 'SO-0010', '2026-01-10', '2026-01-25', '2026-01-25');
+-- Ejemplos de los 3 casos que puede tener un préstamo hoy (hoy = 2026-07-29):
+--  · PR-0002: ATRASADO -> pr_f_dev_esperada ya pasó y pr_f_dev_real sigue NULL
+--  · PR-0003, PR-0007, PR-0009: ACTIVOS a tiempo -> todavía no llega su fecha esperada
+--  · PR-0004, PR-0006, PR-0008: DEVUELTOS, con distintos pr_estado_devolucion y su multa calculada
+--     (PR-0004 = tarde pero en buen estado, PR-0006 = dañado, PR-0008 = perdido)
+INSERT INTO prestamo (id_prestamo, id_ejemplar, id_socio, pr_f_pres, pr_f_dev_esperada, pr_f_dev_real, pr_estado_devolucion, pr_multa) VALUES
+('PR-0001', 'EJ-0002', 'SO-0001', '2026-07-01', '2026-07-10', '2026-07-10', 'Bueno', 0.00),
+('PR-0002', 'EJ-0006', 'SO-0002', '2026-07-05', '2026-07-20', NULL, NULL, 0.00),
+('PR-0003', 'EJ-0010', 'SO-0003', '2026-07-15', '2026-08-15', NULL, NULL, 0.00),
+('PR-0004', 'EJ-0001', 'SO-0004', '2026-06-10', '2026-06-20', '2026-06-25', 'Bueno', 2.50),
+('PR-0005', 'EJ-0003', 'SO-0005', '2026-06-25', '2026-07-02', '2026-07-02', 'Bueno', 0.00),
+('PR-0006', 'EJ-0005', 'SO-0006', '2026-05-15', '2026-05-30', '2026-06-05', 'Dañado', 8.00),
+('PR-0007', 'EJ-0007', 'SO-0007', '2026-07-20', '2026-08-20', NULL, NULL, 0.00),
+('PR-0008', 'EJ-0004', 'SO-0008', '2026-04-10', '2026-04-20', '2026-04-28', 'Perdido', 19.00),
+('PR-0009', 'EJ-0009', 'SO-0009', '2026-07-22', '2026-08-22', NULL, NULL, 0.00),
+('PR-0010', 'EJ-0008', 'SO-0010', '2026-01-10', '2026-01-25', '2026-01-25', 'Bueno', 0.00);
 
 INSERT INTO genero (id_genero, ge_nombre) VALUES
 ('GE-0001', 'Ficción Mágica'),

@@ -12,6 +12,7 @@ require_once 'backend/conexion.php';
 
 $prestamos = $pdo->query(
     "SELECT p.id_prestamo, p.pr_f_pres, p.pr_f_dev_esperada, p.pr_f_dev_real,
+            p.pr_estado_devolucion, p.pr_multa,
             so.so_nombre, so.so_apellido, so.so_cedula,
             l.li_titulo, sd.se_nombre
      FROM prestamo p
@@ -19,11 +20,23 @@ $prestamos = $pdo->query(
      INNER JOIN libro l ON l.id_libro = e.id_libro
      INNER JOIN sede_biblioteca sd ON sd.id_sede = e.id_sede
      INNER JOIN socio so ON so.id_socio = p.id_socio
-     ORDER BY (p.pr_f_dev_real IS NULL) DESC, p.pr_f_pres DESC"
+     ORDER BY (p.pr_f_dev_real IS NULL) DESC, p.pr_f_dev_esperada ASC"
 )->fetchAll();
 
-$prestamosActivos   = array_filter($prestamos, fn($p) => $p['pr_f_dev_real'] === null);
+$hoy = date('Y-m-d');
+
+// Un préstamo está "atrasado" cuando sigue sin devolverse (pr_f_dev_real NULL)
+// y ya pasó su fecha esperada de devolución. Se calcula al vuelo, no se guarda.
+$prestamosActivos   = array_filter($prestamos, fn($p) => $p['pr_f_dev_real'] === null && $p['pr_f_dev_esperada'] >= $hoy);
+$prestamosAtrasados = array_filter($prestamos, fn($p) => $p['pr_f_dev_real'] === null && $p['pr_f_dev_esperada'] < $hoy);
 $prestamosDevueltos = array_filter($prestamos, fn($p) => $p['pr_f_dev_real'] !== null);
+
+function diasDeAtraso(string $fechaEsperada, string $hoy): int
+{
+    $esperada = new DateTime($fechaEsperada);
+    $hoyFecha = new DateTime($hoy);
+    return (int) $hoyFecha->diff($esperada)->days;
+}
 
 $sedes = $pdo->query(
     "SELECT id_sede, se_nombre FROM sede_biblioteca ORDER BY se_nombre"
@@ -43,6 +56,16 @@ $ejemplaresDisponibles = $pdo->query(
      WHERE e.ej_estado = 'Disponible'
      ORDER BY l.li_titulo"
 )->fetchAll();
+
+function claseBadgeEstado(?string $estado): string
+{
+    return match ($estado) {
+        'Bueno'   => 'lib-estado--disponible',
+        'Dañado'  => 'lib-estado--en-reparación',
+        'Perdido' => 'lib-estado--extraviado',
+        default   => '',
+    };
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -63,14 +86,25 @@ $ejemplaresDisponibles = $pdo->query(
 
         <?php
         $mensajes = [
-            'noselecciono'  => 'Debes completar la sede, el ejemplar, el socio y la fecha de devolución.',
-            'nodisponible'  => 'Ese ejemplar ya no está disponible (alguien más lo tomó primero).',
-            'fechainvalida' => 'La fecha de devolución no es válida: no puede ser hoy ni una fecha anterior.',
+            'noselecciono'   => 'Debes completar la sede, el ejemplar, el socio y la fecha de devolución.',
+            'nodisponible'   => 'Ese ejemplar ya no está disponible (alguien más lo tomó primero).',
+            'fechainvalida'  => 'La fecha de devolución no es válida: no puede ser hoy ni una fecha anterior.',
+            'estadoinvalido' => 'Debes indicar en qué estado se devolvió el ejemplar.',
         ];
         $clave = $_GET['error'] ?? null;
         if ($clave && isset($mensajes[$clave])):
         ?>
             <div class="lib-alerta"><?= htmlspecialchars($mensajes[$clave]) ?></div>
+        <?php endif; ?>
+        <?php if (($_GET['ok'] ?? null) === 'devuelto' && isset($_GET['multa'])): ?>
+            <div class="lib-alerta lib-alerta--ok">
+                Devolución registrada.
+                <?php if ((float) $_GET['multa'] > 0): ?>
+                    Se generó una multa de <strong>$<?= htmlspecialchars(number_format((float) $_GET['multa'], 2)) ?></strong>.
+                <?php else: ?>
+                    No se generó ninguna multa.
+                <?php endif; ?>
+            </div>
         <?php endif; ?>
 
         <?php if (empty($prestamos)): ?>
@@ -80,6 +114,9 @@ $ejemplaresDisponibles = $pdo->query(
         <div class="lib-pestanas">
             <button type="button" id="tabBtnActivos" class="lib-pestana lib-pestana--activa" onclick="cambiarPestana('activos')">
                 Activos <span class="lib-pestana__contador"><?= count($prestamosActivos) ?></span>
+            </button>
+            <button type="button" id="tabBtnAtrasados" class="lib-pestana" onclick="cambiarPestana('atrasados')">
+                Atrasados <span class="lib-pestana__contador"><?= count($prestamosAtrasados) ?></span>
             </button>
             <button type="button" id="tabBtnDevueltos" class="lib-pestana" onclick="cambiarPestana('devueltos')">
                 Devueltos <span class="lib-pestana__contador"><?= count($prestamosDevueltos) ?></span>
@@ -111,11 +148,53 @@ $ejemplaresDisponibles = $pdo->query(
                         <td><?= htmlspecialchars($p['pr_f_pres']) ?></td>
                         <td><?= htmlspecialchars($p['pr_f_dev_esperada']) ?></td>
                         <td class="lib-acciones">
-                            <form action="backend/prestamos_devolver.php" method="POST" class="lib-form-inline"
-                                  onsubmit="return confirm('¿Marcar este préstamo como devuelto?');">
+                            <button type="button" class="lib-btn-editar"
+                                    onclick="abrirModalDevolucion('<?= htmlspecialchars($p['id_prestamo'], ENT_QUOTES) ?>', '<?= htmlspecialchars(addslashes($p['li_titulo'])) ?>', false)">
+                                Devolver
+                            </button>
+                            <form action="backend/prestamos_eliminar.php" method="POST" class="lib-form-inline"
+                                  onsubmit="return confirm('¿Eliminar este registro de préstamo?');">
                                 <input type="hidden" name="id_prestamo" value="<?= htmlspecialchars($p['id_prestamo'], ENT_QUOTES) ?>">
-                                <button type="submit" class="lib-btn-editar">Devolver</button>
+                                <button type="submit" class="lib-btn-eliminar">Eliminar</button>
                             </form>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <?php endif; ?>
+        </div>
+
+        <!-- ---------- Pestaña: Atrasados ---------- -->
+        <div id="tabAtrasados" class="lib-tabla-wrap" style="display:none;">
+            <?php if (empty($prestamosAtrasados)): ?>
+                <p class="lib-vacio lib-vacio--con-padding">No hay préstamos atrasados.</p>
+            <?php else: ?>
+            <table class="lib-tabla">
+                <thead>
+                    <tr>
+                        <th>Libro</th>
+                        <th>Sede</th>
+                        <th>Socio</th>
+                        <th>F. dev. esperada</th>
+                        <th>Días de atraso</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($prestamosAtrasados as $p): ?>
+                    <?php $dias = diasDeAtraso($p['pr_f_dev_esperada'], $hoy); ?>
+                    <tr>
+                        <td><?= htmlspecialchars($p['li_titulo']) ?></td>
+                        <td><?= htmlspecialchars($p['se_nombre']) ?></td>
+                        <td><?= htmlspecialchars($p['so_nombre'] . ' ' . $p['so_apellido']) ?> <small class="lib-ayuda">(<?= htmlspecialchars($p['so_cedula']) ?>)</small></td>
+                        <td><?= htmlspecialchars($p['pr_f_dev_esperada']) ?></td>
+                        <td><span class="lib-estado lib-estado--extraviado"><?= $dias ?> día<?= $dias === 1 ? '' : 's' ?></span></td>
+                        <td class="lib-acciones">
+                            <button type="button" class="lib-btn-editar"
+                                    onclick="abrirModalDevolucion('<?= htmlspecialchars($p['id_prestamo'], ENT_QUOTES) ?>', '<?= htmlspecialchars(addslashes($p['li_titulo'])) ?>', true)">
+                                Devolver
+                            </button>
                             <form action="backend/prestamos_eliminar.php" method="POST" class="lib-form-inline"
                                   onsubmit="return confirm('¿Eliminar este registro de préstamo?');">
                                 <input type="hidden" name="id_prestamo" value="<?= htmlspecialchars($p['id_prestamo'], ENT_QUOTES) ?>">
@@ -143,6 +222,8 @@ $ejemplaresDisponibles = $pdo->query(
                         <th>F. préstamo</th>
                         <th>F. dev. esperada</th>
                         <th>F. devolución real</th>
+                        <th>Estado</th>
+                        <th>Multa</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -155,6 +236,8 @@ $ejemplaresDisponibles = $pdo->query(
                         <td><?= htmlspecialchars($p['pr_f_pres']) ?></td>
                         <td><?= htmlspecialchars($p['pr_f_dev_esperada']) ?></td>
                         <td><?= htmlspecialchars($p['pr_f_dev_real']) ?></td>
+                        <td><span class="lib-estado <?= claseBadgeEstado($p['pr_estado_devolucion']) ?>"><?= htmlspecialchars($p['pr_estado_devolucion'] ?? '—') ?></span></td>
+                        <td><?= $p['pr_multa'] > 0 ? '$' . htmlspecialchars(number_format((float) $p['pr_multa'], 2)) : '—' ?></td>
                         <td class="lib-acciones">
                             <form action="backend/prestamos_eliminar.php" method="POST" class="lib-form-inline lib-form-inline--ancho"
                                   onsubmit="return confirm('¿Eliminar este registro de préstamo?');">
@@ -220,17 +303,54 @@ $ejemplaresDisponibles = $pdo->query(
         </div>
     </div>
 
+    <!-- ================= MODAL DEVOLUCIÓN ================= -->
+    <div id="modalDevolucion" class="lib-modal-fondo">
+        <div class="lib-modal lib-modal--angosto">
+            <div class="lib-modal__cabecera">
+                <h3>Registrar devolución</h3>
+                <button type="button" class="lib-modal__cerrar" onclick="cerrarModalDevolucion()">&times;</button>
+            </div>
+
+            <form action="backend/prestamos_devolver.php" method="POST">
+                <input type="hidden" id="dev_id_prestamo" name="id_prestamo" value="">
+                <p class="lib-ayuda" id="dev_info_libro" style="margin-top:0;"></p>
+
+                <label>¿En qué estado se devuelve el ejemplar?</label>
+                <div class="lib-radio-grupo">
+                    <label class="lib-radio-opcion">
+                        <input type="radio" name="pr_estado_devolucion" value="Bueno" required>
+                        Bueno — se devuelve en buen estado
+                    </label>
+                    <label class="lib-radio-opcion">
+                        <input type="radio" name="pr_estado_devolucion" value="Dañado" required>
+                        Dañado — se devuelve pero dañado
+                    </label>
+                    <label class="lib-radio-opcion">
+                        <input type="radio" name="pr_estado_devolucion" value="Perdido" required>
+                        Perdido — el socio no lo entrega / se le perdió
+                    </label>
+                </div>
+
+                <p id="dev_aviso_atraso" class="lib-ayuda" style="display:none;">Este préstamo está atrasado: se cobrará una multa por cada día de atraso, sin importar el estado en que se devuelva.</p>
+                <p class="lib-ayuda">Si el ejemplar se marca como dañado o perdido, se cobra una multa adicional aunque no esté atrasado.</p>
+
+                <button type="submit" class="lib-btn-primario" style="margin-top:1rem;">Confirmar devolución</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         // Ejemplares disponibles de TODAS las sedes; el modal los filtra en el navegador
         // según la sede que el usuario elija en el paso 1 (sin recargar la página).
         const ejemplaresPorSede = <?= json_encode($ejemplaresDisponibles, JSON_UNESCAPED_UNICODE) ?>;
 
         function cambiarPestana(cual) {
-            const activos = cual === 'activos';
-            document.getElementById('tabActivos').style.display = activos ? 'block' : 'none';
-            document.getElementById('tabDevueltos').style.display = activos ? 'none' : 'block';
-            document.getElementById('tabBtnActivos').classList.toggle('lib-pestana--activa', activos);
-            document.getElementById('tabBtnDevueltos').classList.toggle('lib-pestana--activa', !activos);
+            document.getElementById('tabActivos').style.display = cual === 'activos' ? 'block' : 'none';
+            document.getElementById('tabAtrasados').style.display = cual === 'atrasados' ? 'block' : 'none';
+            document.getElementById('tabDevueltos').style.display = cual === 'devueltos' ? 'block' : 'none';
+            document.getElementById('tabBtnActivos').classList.toggle('lib-pestana--activa', cual === 'activos');
+            document.getElementById('tabBtnAtrasados').classList.toggle('lib-pestana--activa', cual === 'atrasados');
+            document.getElementById('tabBtnDevueltos').classList.toggle('lib-pestana--activa', cual === 'devueltos');
         }
 
         function abrirModal() {
@@ -317,6 +437,20 @@ $ejemplaresDisponibles = $pdo->query(
                 document.getElementById('avisoFecha').style.display = 'block';
             }
         });
+
+        // ---- Modal de devolución (con estado del ejemplar y multa) ----
+        function abrirModalDevolucion(idPrestamo, tituloLibro, estaAtrasado) {
+            document.getElementById('dev_id_prestamo').value = idPrestamo;
+            document.getElementById('dev_info_libro').textContent = 'Libro: ' + tituloLibro;
+            document.getElementById('dev_aviso_atraso').style.display = estaAtrasado ? 'block' : 'none';
+
+            document.querySelectorAll('#modalDevolucion input[name="pr_estado_devolucion"]').forEach(r => r.checked = false);
+
+            document.getElementById('modalDevolucion').classList.add('lib-modal-fondo--visible');
+        }
+        function cerrarModalDevolucion() {
+            document.getElementById('modalDevolucion').classList.remove('lib-modal-fondo--visible');
+        }
     </script>
 </body>
 </html>

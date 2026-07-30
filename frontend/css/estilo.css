@@ -391,6 +391,27 @@ h1, h2, h3, .lib-navbar__brand h1 {
 .lib-tags-lista { margin-top: 0.7rem; min-height: 1.5rem; }
 .lib-modal--angosto { max-width: 360px; }
 
+/* ---------- Radios del modal de devolución ---------- */
+.lib-radio-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+}
+.lib-radio-opcion {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid #cbbfa8;
+    border-radius: 3px;
+    background: #fff;
+    font-weight: 400;
+    cursor: pointer;
+}
+.lib-radio-opcion input[type="radio"] { margin: 0; accent-color: var(--vino-oscuro); }
+.lib-radio-opcion:has(input:checked) { border-color: var(--vino-oscuro); background: #f6efe0; }
+
 /* ---------- Badges de estado del ejemplar ---------- */
 .lib-estado {
     display: inline-block;
