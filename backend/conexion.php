@@ -38,6 +38,8 @@ $options = [
 
 try {
     $pdo = new PDO($dsn, $user, $password, $options);
+    // Forzar la codificación a UTF-8 en la conexión
+    $pdo->exec("SET NAMES 'UTF8'");
 } catch (PDOException $e) {
     http_response_code(500);
     header('Content-Type: application/json; charset=utf-8');
