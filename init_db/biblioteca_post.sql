@@ -104,7 +104,7 @@ INSERT INTO sede_biblioteca (id_sede, se_nombre, se_direccion) VALUES
 ('SE-0010', 'Biblioteca Móvil', 'Unidad de Transporte 01');
 
 INSERT INTO libro (id_libro, li_titulo, li_autor, li_editorial, li_genero, li_isbn) VALUES
-('LI-0001', 'Cien años de soledad', 'Gabriel García Márquez', 'Sudamericana', 'Ficción Mágica', '978-84-376-0494-7'),
+('LI-0001', 'Cien años de soledad', 'Gabriel García Márquez', 'Sudamericana', 'Ficción Mágica', '9788437604947'),
 ('LI-0002', '1984', 'George Orwell', 'Secker & Warburg', 'Ciencia Ficción', '9780452284234'),
 ('LI-0003', 'El Hobbit', 'J.R.R. Tolkien', 'Allen & Unwin', 'Fantasía', '978061102217'),
 ('LI-0004', 'Fundación', 'Isaac Asimov', 'Gnome Press', 'Ciencia Ficción', '9780553293350'),

@@ -156,7 +156,7 @@ $siguienteIdLibro = 'LI-' . str_pad((string)($maxNum + 1), 4, '0', STR_PAD_LEFT)
                 <input type="text" id="li_editorial" name="li_editorial" placeholder="Opcional">
 
                 <label for="li_isbn">ISBN</label>
-                <input type="text" id="li_isbn" name="li_isbn" placeholder="Ej. 9780441013593">
+                <input type="text" id="li_isbn" name="li_isbn" maxlength="13" placeholder="Ej. 9780441013593">
                 <p class="lib-ayuda">Opcional. Ingresa 10 o 13 dígitos (solo números).</p>
 
                 <label>Géneros</label>
@@ -358,6 +358,14 @@ $siguienteIdLibro = 'LI-' . str_pad((string)($maxNum + 1), 4, '0', STR_PAD_LEFT)
                 // Forzamos a que el input envíe el valor limpio sin guiones
                 document.getElementById('li_isbn').value = isbnLimpio.toUpperCase();
             }
+        });
+        // Bloquear ingreso de caracteres no válidos en el ISBN en tiempo real
+        document.getElementById('li_isbn').addEventListener('input', function (e) {
+            // Reemplaza cualquier cosa que NO sea un número (0-9) o la letra X/x por una cadena vacía
+            let valorLimpio = this.value.replace(/[^0-9Xx]/g, '');
+            
+            // Convertimos la 'x' minúscula a mayúscula automáticamente
+            this.value = valorLimpio.toUpperCase();
         });
     </script>
 </body>
