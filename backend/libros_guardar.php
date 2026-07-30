@@ -8,6 +8,7 @@ if (!isset($_SESSION['usuario_activo'])) {
 }
 
 require_once 'conexion.php';
+require_once 'includes/ids.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../libros.php');
@@ -118,9 +119,10 @@ try {
     }
 
     if (!empty($generos)) {
-        $stmtTag = $pdo->prepare("INSERT INTO tag (id_libro, id_genero) VALUES (?, ?)");
+        $stmtTag = $pdo->prepare("INSERT INTO tag (id_tag, id_libro, id_genero) VALUES (?, ?, ?)");
         foreach ($generos as $idGenero) {
-            $stmtTag->execute([$idLibro, (int)$idGenero]);
+            $idTag = generarSiguienteId($pdo, 'tag', 'id_tag', 'TA');
+            $stmtTag->execute([$idTag, $idLibro, $idGenero]);
         }
     }
 

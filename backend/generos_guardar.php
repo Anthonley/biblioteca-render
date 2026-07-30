@@ -8,6 +8,7 @@ if (!isset($_SESSION['usuario_activo'])) {
 }
 
 require_once 'conexion.php';
+require_once 'includes/ids.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../libros.php');
@@ -31,9 +32,10 @@ try {
         exit();
     }
 
-    // Insertar el nuevo género
-    $stmt = $pdo->prepare("INSERT INTO genero (ge_nombre) VALUES (?)");
-    $stmt->execute([$geNombre]);
+    // Insertar el nuevo género con id manual (GE-0000)
+    $idGenero = generarSiguienteId($pdo, 'genero', 'id_genero', 'GE');
+    $stmt = $pdo->prepare("INSERT INTO genero (id_genero, ge_nombre) VALUES (?, ?)");
+    $stmt->execute([$idGenero, $geNombre]);
 
     header('Location: ../libros.php?ok=generocreado');
     exit();

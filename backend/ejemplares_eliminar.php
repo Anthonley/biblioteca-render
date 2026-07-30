@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['id_ejemplar'])) {
     exit();
 }
 
-$idEjemplar = (int)$_POST['id_ejemplar'];
+$idEjemplar = trim($_POST['id_ejemplar']);
 
 try {
     $stmt = $pdo->prepare(

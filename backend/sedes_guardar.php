@@ -8,6 +8,7 @@ if (!isset($_SESSION['usuario_activo'])) {
 }
 
 require_once 'conexion.php';
+require_once 'includes/ids.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../sedes.php');
@@ -29,7 +30,7 @@ try {
         $stmt->execute([$nombre]);
     } else {
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM sede_biblioteca WHERE LOWER(se_nombre) = LOWER(?) AND id_sede <> ?");
-        $stmt->execute([$nombre, (int)$idSede]);
+        $stmt->execute([$nombre, $idSede]);
     }
 
     if ((int)$stmt->fetchColumn() > 0) {
@@ -38,15 +39,16 @@ try {
     }
 
     if ($idSede === '') {
+        $idSede = generarSiguienteId($pdo, 'sede_biblioteca', 'id_sede', 'SE');
         $stmt = $pdo->prepare(
-            "INSERT INTO sede_biblioteca (se_nombre, se_direccion) VALUES (?, ?)"
+            "INSERT INTO sede_biblioteca (id_sede, se_nombre, se_direccion) VALUES (?, ?, ?)"
         );
-        $stmt->execute([$nombre, $direccion]);
+        $stmt->execute([$idSede, $nombre, $direccion]);
     } else {
         $stmt = $pdo->prepare(
             "UPDATE sede_biblioteca SET se_nombre = ?, se_direccion = ? WHERE id_sede = ?"
         );
-        $stmt->execute([$nombre, $direccion, (int)$idSede]);
+        $stmt->execute([$nombre, $direccion, $idSede]);
     }
 
     header('Location: ../sedes.php');

@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['id_sede'])) {
     exit();
 }
 
-$idSede = (int)$_POST['id_sede'];
+$idSede = trim($_POST['id_sede']);
 
 try {
     // Una sede con ejemplares no se puede borrar: el CASCADE se llevaría

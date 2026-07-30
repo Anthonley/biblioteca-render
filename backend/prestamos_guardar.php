@@ -8,16 +8,17 @@ if (!isset($_SESSION['usuario_activo'])) {
 }
 
 require_once 'conexion.php';
+require_once 'includes/ids.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../prestamos.php');
     exit();
 }
 
-$idSocio    = (int)($_POST['id_socio'] ?? 0);
-$idEjemplar = (int)($_POST['id_ejemplar'] ?? 0);
+$idSocio    = trim($_POST['id_socio'] ?? '');
+$idEjemplar = trim($_POST['id_ejemplar'] ?? '');
 
-if (!$idSocio || !$idEjemplar) {
+if ($idSocio === '' || $idEjemplar === '') {
     header('Location: ../prestamos.php?error=noselecciono');
     exit();
 }
@@ -37,9 +38,10 @@ try {
         exit();
     }
 
+    $idPrestamo = generarSiguienteId($pdo, 'prestamo', 'id_prestamo', 'PR');
     $pdo->prepare(
-        "INSERT INTO prestamo (id_ejemplar, id_socio) VALUES (?, ?)"
-    )->execute([$idEjemplar, $idSocio]);
+        "INSERT INTO prestamo (id_prestamo, id_ejemplar, id_socio) VALUES (?, ?, ?)"
+    )->execute([$idPrestamo, $idEjemplar, $idSocio]);
 
     $pdo->prepare(
         "UPDATE ejemplar SET ej_estado = 'Prestado' WHERE id_ejemplar = ?"

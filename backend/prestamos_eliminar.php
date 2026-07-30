@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['id_prestamo'])) {
     exit();
 }
 
-$idPrestamo = (int)$_POST['id_prestamo'];
+$idPrestamo = trim($_POST['id_prestamo']);
 
 try {
     $pdo->beginTransaction();

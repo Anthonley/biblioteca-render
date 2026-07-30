@@ -72,7 +72,7 @@ $estados = ['Disponible', 'En Reparación', 'Extraviado'];
                 <tbody>
                     <?php foreach ($ejemplares as $ej): ?>
                     <tr>
-                        <td><?= (int)$ej['id_ejemplar'] ?></td>
+                        <td><?= htmlspecialchars($ej['id_ejemplar']) ?></td>
                         <td><?= htmlspecialchars($ej['li_titulo']) ?></td>
                         <td><?= htmlspecialchars($ej['se_nombre']) ?></td>
                         <td><span class="lib-estado lib-estado--<?= strtolower(str_replace(' ', '-', $ej['ej_estado'])) ?>"><?= htmlspecialchars($ej['ej_estado']) ?></span></td>
@@ -85,15 +85,15 @@ $estados = ['Disponible', 'En Reparación', 'Extraviado'];
                             <?php else: ?>
                             <button type="button" class="lib-btn-editar"
                                 onclick="abrirModalEditar(
-                                    <?= (int)$ej['id_ejemplar'] ?>,
+                                    '<?= htmlspecialchars($ej['id_ejemplar'], ENT_QUOTES) ?>',
                                     '<?= htmlspecialchars($ej['id_libro'], ENT_QUOTES) ?>',
-                                    <?= (int)$ej['id_sede'] ?>,
+                                    '<?= htmlspecialchars($ej['id_sede'], ENT_QUOTES) ?>',
                                     '<?= htmlspecialchars($ej['ej_estado'], ENT_QUOTES) ?>'
                                 )">Editar</button>
 
                             <form action="backend/ejemplares_eliminar.php" method="POST" class="lib-form-inline"
                                   onsubmit="return confirm('¿Eliminar este ejemplar?');">
-                                <input type="hidden" name="id_ejemplar" value="<?= (int)$ej['id_ejemplar'] ?>">
+                                <input type="hidden" name="id_ejemplar" value="<?= htmlspecialchars($ej['id_ejemplar'], ENT_QUOTES) ?>">
                                 <button type="submit" class="lib-btn-eliminar">Eliminar</button>
                             </form>
                             <?php endif; ?>
@@ -127,7 +127,7 @@ $estados = ['Disponible', 'En Reparación', 'Extraviado'];
                 <label for="id_sede">Sede</label>
                 <select id="id_sede" name="id_sede" required>
                     <?php foreach ($sedes as $s): ?>
-                        <option value="<?= (int)$s['id_sede'] ?>"><?= htmlspecialchars($s['se_nombre']) ?></option>
+                        <option value="<?= htmlspecialchars($s['id_sede'], ENT_QUOTES) ?>"><?= htmlspecialchars($s['se_nombre']) ?></option>
                     <?php endforeach; ?>
                 </select>
 

@@ -105,12 +105,12 @@ $ejemplaresDisponibles = $pdo->query(
                         <td class="lib-acciones">
                             <form action="backend/prestamos_devolver.php" method="POST" class="lib-form-inline"
                                   onsubmit="return confirm('¿Marcar este préstamo como devuelto?');">
-                                <input type="hidden" name="id_prestamo" value="<?= (int)$p['id_prestamo'] ?>">
+                                <input type="hidden" name="id_prestamo" value="<?= htmlspecialchars($p['id_prestamo'], ENT_QUOTES) ?>">
                                 <button type="submit" class="lib-btn-editar">Devolver</button>
                             </form>
                             <form action="backend/prestamos_eliminar.php" method="POST" class="lib-form-inline"
                                   onsubmit="return confirm('¿Eliminar este registro de préstamo?');">
-                                <input type="hidden" name="id_prestamo" value="<?= (int)$p['id_prestamo'] ?>">
+                                <input type="hidden" name="id_prestamo" value="<?= htmlspecialchars($p['id_prestamo'], ENT_QUOTES) ?>">
                                 <button type="submit" class="lib-btn-eliminar">Eliminar</button>
                             </form>
                         </td>
@@ -148,7 +148,7 @@ $ejemplaresDisponibles = $pdo->query(
                         <td class="lib-acciones">
                             <form action="backend/prestamos_eliminar.php" method="POST" class="lib-form-inline lib-form-inline--ancho"
                                   onsubmit="return confirm('¿Eliminar este registro de préstamo?');">
-                                <input type="hidden" name="id_prestamo" value="<?= (int)$p['id_prestamo'] ?>">
+                                <input type="hidden" name="id_prestamo" value="<?= htmlspecialchars($p['id_prestamo'], ENT_QUOTES) ?>">
                                 <button type="submit" class="lib-btn-eliminar lib-btn-eliminar--ancho">Eliminar</button>
                             </form>
                         </td>
@@ -174,7 +174,7 @@ $ejemplaresDisponibles = $pdo->query(
                 <select id="id_socio" name="id_socio" required>
                     <option value="">Seleccione…</option>
                     <?php foreach ($socios as $s): ?>
-                        <option value="<?= (int)$s['id_socio'] ?>">
+                        <option value="<?= htmlspecialchars($s['id_socio'], ENT_QUOTES) ?>">
                             <?= htmlspecialchars($s['so_nombre'] . ' ' . $s['so_apellido'] . ' — ' . $s['so_cedula']) ?>
                         </option>
                     <?php endforeach; ?>
@@ -184,7 +184,7 @@ $ejemplaresDisponibles = $pdo->query(
                 <select id="id_ejemplar" name="id_ejemplar" required>
                     <option value="">Seleccione…</option>
                     <?php foreach ($ejemplaresDisponibles as $e): ?>
-                        <option value="<?= (int)$e['id_ejemplar'] ?>">
+                        <option value="<?= htmlspecialchars($e['id_ejemplar'], ENT_QUOTES) ?>">
                             <?= htmlspecialchars($e['li_titulo'] . ' — ' . $e['se_nombre']) ?>
                         </option>
                     <?php endforeach; ?>

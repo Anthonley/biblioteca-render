@@ -8,6 +8,7 @@ if (!isset($_SESSION['usuario_activo'])) {
 }
 
 require_once 'conexion.php';
+require_once 'includes/ids.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../socios.php');
@@ -70,7 +71,7 @@ try {
         $stmt->execute([$cedula]);
     } else {
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM socio WHERE so_cedula = ? AND id_socio <> ?");
-        $stmt->execute([$cedula, (int)$idSocio]);
+        $stmt->execute([$cedula, $idSocio]);
     }
 
     if ((int)$stmt->fetchColumn() > 0) {
@@ -79,15 +80,16 @@ try {
     }
 
     if ($idSocio === '') {
+        $idSocio = generarSiguienteId($pdo, 'socio', 'id_socio', 'SO');
         $stmt = $pdo->prepare(
-            "INSERT INTO socio (so_cedula, so_nombre, so_apellido, so_telefono) VALUES (?, ?, ?, ?)"
+            "INSERT INTO socio (id_socio, so_cedula, so_nombre, so_apellido, so_telefono) VALUES (?, ?, ?, ?, ?)"
         );
-        $stmt->execute([$cedula, $nombre, $apellido, $telefono !== '' ? $telefono : null]);
+        $stmt->execute([$idSocio, $cedula, $nombre, $apellido, $telefono !== '' ? $telefono : null]);
     } else {
         $stmt = $pdo->prepare(
             "UPDATE socio SET so_cedula = ?, so_nombre = ?, so_apellido = ?, so_telefono = ? WHERE id_socio = ?"
         );
-        $stmt->execute([$cedula, $nombre, $apellido, $telefono !== '' ? $telefono : null, (int)$idSocio]);
+        $stmt->execute([$cedula, $nombre, $apellido, $telefono !== '' ? $telefono : null, $idSocio]);
     }
 
     header('Location: ../socios.php');

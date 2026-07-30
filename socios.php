@@ -103,7 +103,7 @@ $letras = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P',
                 <div class="lib-socio-card__acciones">
                     <button type="button" class="lib-btn-editar"
                         onclick="abrirModalEditar(
-                            <?= (int)$s['id_socio'] ?>,
+                            '<?= htmlspecialchars($s['id_socio'], ENT_QUOTES) ?>',
                             '<?= htmlspecialchars($s['so_cedula'], ENT_QUOTES) ?>',
                             '<?= htmlspecialchars($s['so_nombre'], ENT_QUOTES) ?>',
                             '<?= htmlspecialchars($s['so_apellido'], ENT_QUOTES) ?>',
@@ -112,7 +112,7 @@ $letras = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P',
 
                     <form action="backend/socios_eliminar.php" method="POST" class="lib-form-inline"
                           onsubmit="return confirm('¿Eliminar este socio?');">
-                        <input type="hidden" name="id_socio" value="<?= (int)$s['id_socio'] ?>">
+                        <input type="hidden" name="id_socio" value="<?= htmlspecialchars($s['id_socio'], ENT_QUOTES) ?>">
                         <button type="submit" class="lib-btn-eliminar">Eliminar</button>
                     </form>
                 </div>

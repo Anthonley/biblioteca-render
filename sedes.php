@@ -64,14 +64,14 @@ $sedes = $pdo->query(
                 <div class="lib-sede-card__acciones">
                     <button type="button" class="lib-btn-editar"
                         onclick="abrirModalEditar(
-                            <?= (int)$s['id_sede'] ?>,
+                            '<?= htmlspecialchars($s['id_sede'], ENT_QUOTES) ?>',
                             '<?= htmlspecialchars($s['se_nombre'], ENT_QUOTES) ?>',
                             '<?= htmlspecialchars($s['se_direccion'], ENT_QUOTES) ?>'
                         )">Editar</button>
 
                     <form action="backend/sedes_eliminar.php" method="POST" class="lib-form-inline"
                           onsubmit="return confirm('¿Eliminar esta sede?');">
-                        <input type="hidden" name="id_sede" value="<?= (int)$s['id_sede'] ?>">
+                        <input type="hidden" name="id_sede" value="<?= htmlspecialchars($s['id_sede'], ENT_QUOTES) ?>">
                         <button type="submit" class="lib-btn-eliminar">Eliminar</button>
                     </form>
                 </div>

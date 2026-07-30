@@ -14,7 +14,7 @@ require_once 'backend/conexion.php';
 $libros = $pdo->query(
     "SELECT l.id_libro, l.li_titulo, l.li_autor, l.li_editorial, l.li_isbn,
             STRING_AGG(g.ge_nombre, ', ' ORDER BY g.ge_nombre) AS generos_nombres,
-            STRING_AGG(g.id_genero::text, ',' ORDER BY g.id_genero) AS generos_ids
+            STRING_AGG(g.id_genero, ',' ORDER BY g.id_genero) AS generos_ids
      FROM libro l
      LEFT JOIN tag t ON t.id_libro = l.id_libro
      LEFT JOIN genero g ON g.id_genero = t.id_genero
@@ -163,7 +163,7 @@ $siguienteIdLibro = 'LI-' . str_pad((string)($maxNum + 1), 4, '0', STR_PAD_LEFT)
                 <div class="lib-generos-selector">
                     <select id="selectGenero">
                         <?php foreach ($generos as $g): ?>
-                            <option value="<?= (int)$g['id_genero'] ?>"><?= htmlspecialchars($g['ge_nombre']) ?></option>
+                            <option value="<?= htmlspecialchars($g['id_genero'], ENT_QUOTES) ?>"><?= htmlspecialchars($g['ge_nombre']) ?></option>
                         <?php endforeach; ?>
                     </select>
                     <button type="button" class="lib-btn-secundario" onclick="agregarTag()">+ Añadir tag</button>
@@ -201,11 +201,11 @@ $siguienteIdLibro = 'LI-' . str_pad((string)($maxNum + 1), 4, '0', STR_PAD_LEFT)
         // Nombre de cada género por id, para poder pintar los chips al editar
         const generosMap = {
             <?php foreach ($generos as $g): ?>
-                <?= (int)$g['id_genero'] ?>: <?= json_encode($g['ge_nombre'], JSON_UNESCAPED_UNICODE) ?>,
+                <?= json_encode($g['id_genero'], JSON_UNESCAPED_UNICODE) ?>: <?= json_encode($g['ge_nombre'], JSON_UNESCAPED_UNICODE) ?>,
             <?php endforeach; ?>
         };
 
-        let tagsSeleccionados = []; // array de ids (number) seleccionados en el modal
+        let tagsSeleccionados = []; // array de ids (string, ej. "GE-0001") seleccionados en el modal
 
         function renderTags() {
             const lista = document.getElementById('listaTags');
@@ -216,7 +216,7 @@ $siguienteIdLibro = 'LI-' . str_pad((string)($maxNum + 1), 4, '0', STR_PAD_LEFT)
             tagsSeleccionados.forEach(id => {
                 const chip = document.createElement('span');
                 chip.className = 'lib-chip lib-chip--removible';
-                chip.innerHTML = (generosMap[id] ?? '?') + ' <button type="button" onclick="quitarTag(' + id + ')">&times;</button>';
+                chip.innerHTML = (generosMap[id] ?? '?') + ' <button type="button" onclick="quitarTag(\'' + id + '\')">&times;</button>';
                 lista.appendChild(chip);
 
                 const input = document.createElement('input');
@@ -229,7 +229,7 @@ $siguienteIdLibro = 'LI-' . str_pad((string)($maxNum + 1), 4, '0', STR_PAD_LEFT)
 
         function agregarTag() {
             const select = document.getElementById('selectGenero');
-            const id = parseInt(select.value, 10);
+            const id = select.value;
             if (!tagsSeleccionados.includes(id)) {
                 tagsSeleccionados.push(id);
                 renderTags();
@@ -275,7 +275,7 @@ $siguienteIdLibro = 'LI-' . str_pad((string)($maxNum + 1), 4, '0', STR_PAD_LEFT)
             ocultarErrorLibro();
 
             tagsSeleccionados = generosIdsCsv
-                ? generosIdsCsv.split(',').map(v => parseInt(v, 10))
+                ? generosIdsCsv.split(',')
                 : [];
             renderTags();
             abrirModal();
