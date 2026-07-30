@@ -45,7 +45,8 @@ CREATE TABLE socio (
     so_cedula VARCHAR(10) NOT NULL UNIQUE,
     so_nombre VARCHAR(100) NOT NULL, 
     so_apellido VARCHAR(100) NOT NULL, 
-    so_telefono VARCHAR(15)
+    so_telefono VARCHAR(15),
+    so_correo VARCHAR(150) NOT NULL
 );
 
 -- id_ejemplar ahora es manual con formato EJ-0000 (ver ejemplares.php / ejemplares_guardar.php)
@@ -108,17 +109,17 @@ INSERT INTO libro (id_libro, li_titulo, li_autor, li_editorial, li_genero, li_is
 ('LI-0009', 'Rayuela', 'Julio Cortázar', 'Sudamericana', 'Novela Contemporánea', '978-84-376-0495-4'),
 ('LI-0010', 'Dune', 'Frank Herbert', 'Chilton Books', 'Ciencia Ficción', '978-0-441-01359-3');
 
-INSERT INTO socio (id_socio, so_cedula, so_nombre, so_apellido, so_telefono) VALUES
-('SO-0001', '1712345671', 'Juan', 'Perez', '0991111111'),
-('SO-0002', '1712345672', 'Maria', 'Gomez', '0992222222'),
-('SO-0003', '1712345673', 'Carlos', 'Lopez', '0993333333'),
-('SO-0004', '1712345674', 'Ana', 'Martinez', '0994444444'),
-('SO-0005', '1712345675', 'Luis', 'Rodriguez', '0995555555'),
-('SO-0006', '1712345676', 'Elena', 'Sanchez', '0996666666'),
-('SO-0007', '1712345677', 'Javier', 'Romero', '0997777777'),
-('SO-0008', '1712345678', 'Sofia', 'Torres', '0998888888'),
-('SO-0009', '1712345679', 'Diego', 'Herrera', '0999999999'),
-('SO-0010', '1712345680', 'Lucia', 'Castro', '0990000000');
+INSERT INTO socio (id_socio, so_cedula, so_nombre, so_apellido, so_telefono, so_correo) VALUES
+('SO-0001', '1712345671', 'Juan', 'Perez', '0991111111', 'juan.perez@example.com'),
+('SO-0002', '1712345672', 'Maria', 'Gomez', '0992222222', 'maria.gomez@example.com'),
+('SO-0003', '1712345673', 'Carlos', 'Lopez', '0993333333', 'carlos.lopez@example.com'),
+('SO-0004', '1712345674', 'Ana', 'Martinez', '0994444444', 'ana.martinez@example.com'),
+('SO-0005', '1712345675', 'Luis', 'Rodriguez', '0995555555', 'luis.rodriguez@example.com'),
+('SO-0006', '1712345676', 'Elena', 'Sanchez', '0996666666', 'elena.sanchez@example.com'),
+('SO-0007', '1712345677', 'Javier', 'Romero', '0997777777', 'javier.romero@example.com'),
+('SO-0008', '1712345678', 'Sofia', 'Torres', '0998888888', 'sofia.torres@example.com'),
+('SO-0009', '1712345679', 'Diego', 'Herrera', '0999999999', 'diego.herrera@example.com'),
+('SO-0010', '1712345680', 'Lucia', 'Castro', '0990000000', 'lucia.castro@example.com');
 
 INSERT INTO ejemplar (id_ejemplar, id_libro, id_sede, ej_estado) VALUES
 ('EJ-0001', 'LI-0001', 'SE-0001', 'Disponible'),

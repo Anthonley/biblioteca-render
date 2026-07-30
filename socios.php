@@ -11,7 +11,7 @@ $usuario = $_SESSION['usuario_activo'];
 require_once 'backend/conexion.php';
 
 $socios = $pdo->query(
-    "SELECT id_socio, so_cedula, so_nombre, so_apellido, so_telefono
+    "SELECT id_socio, so_cedula, so_nombre, so_apellido, so_telefono, so_correo
      FROM socio
      ORDER BY so_nombre, so_apellido"
 )->fetchAll();
@@ -38,10 +38,6 @@ $letras = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P',
 
         <?php
         $mensajes = [
-            'camposobligatorios' => 'Cédula, nombre y apellido son obligatorios.',
-            'ceduladuplicada'    => 'Ya existe un socio registrado con esa cédula.',
-            'cedulanovalida'     => 'La cédula ingresada no es válida para Ecuador.',
-            'telefonoinvalido'   => 'El teléfono debe contener solo números y tener entre 7 y 15 dígitos.',
             'prestamosactivos'   => 'No se puede eliminar: este socio tiene préstamos activos (sin devolver).',
         ];
         $clave = $_GET['error'] ?? null;
@@ -99,6 +95,7 @@ $letras = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P',
                     <h4><?= htmlspecialchars($s['so_nombre'] . ' ' . $s['so_apellido']) ?></h4>
                     <p class="lib-socio-card__cedula">Cédula: <?= htmlspecialchars($s['so_cedula']) ?></p>
                     <p class="lib-socio-card__telefono"><?= htmlspecialchars($s['so_telefono'] ?? 'Sin teléfono registrado') ?></p>
+                    <p class="lib-socio-card__correo"><?= htmlspecialchars($s['so_correo']) ?></p>
                 </div>
                 <div class="lib-socio-card__acciones">
                     <button type="button" class="lib-btn-editar"
@@ -107,7 +104,8 @@ $letras = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P',
                             '<?= htmlspecialchars($s['so_cedula'], ENT_QUOTES) ?>',
                             '<?= htmlspecialchars($s['so_nombre'], ENT_QUOTES) ?>',
                             '<?= htmlspecialchars($s['so_apellido'], ENT_QUOTES) ?>',
-                            '<?= htmlspecialchars($s['so_telefono'] ?? '', ENT_QUOTES) ?>'
+                            '<?= htmlspecialchars($s['so_telefono'] ?? '', ENT_QUOTES) ?>',
+                            '<?= htmlspecialchars($s['so_correo'], ENT_QUOTES) ?>'
                         )">Editar</button>
 
                     <form action="backend/socios_eliminar.php" method="POST" class="lib-form-inline"
@@ -132,11 +130,11 @@ $letras = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P',
                 <button type="button" class="lib-modal__cerrar" onclick="cerrarModal()">&times;</button>
             </div>
 
-            <form action="backend/socios_guardar.php" method="POST">
+            <form id="formSocio" action="backend/socios_guardar.php" method="POST">
                 <input type="hidden" name="id_socio" id="id_socio" value="">
 
                 <label for="so_cedula">Cédula</label>
-                <input type="text" id="so_cedula" name="so_cedula" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" title="Debe ingresar 10 dígitos numéricos y un dígito verificador válido" required>
+                <input type="text" id="so_cedula" name="so_cedula" maxlength="10" inputmode="numeric" title="Debe ingresar 10 dígitos numéricos y un dígito verificador válido" required>
 
                 <label for="so_nombre">Nombre</label>
                 <input type="text" id="so_nombre" name="so_nombre" required>
@@ -145,7 +143,12 @@ $letras = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P',
                 <input type="text" id="so_apellido" name="so_apellido" required>
 
                 <label for="so_telefono">Teléfono</label>
-                <input type="text" id="so_telefono" name="so_telefono" maxlength="15" pattern="[0-9]{7,15}" inputmode="numeric" title="Debe contener solo números, entre 7 y 15 dígitos">
+                <input type="text" id="so_telefono" name="so_telefono" maxlength="15" inputmode="numeric" title="Debe contener solo números, entre 7 y 15 dígitos">
+
+                <label for="so_correo">Correo</label>
+                <input type="email" id="so_correo" name="so_correo" placeholder="nombre@correo.com" required>
+
+                <p id="errorFormSocio" class="lib-alerta" style="display:none;"></p>
 
                 <button type="submit" class="lib-btn-primario" style="margin-top:1rem;">Guardar socio</button>
             </form>
@@ -160,6 +163,18 @@ $letras = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P',
             document.getElementById('modalSocio').classList.remove('lib-modal-fondo--visible');
         }
 
+        function ocultarErrorSocio() {
+            const p = document.getElementById('errorFormSocio');
+            p.style.display = 'none';
+            p.textContent = '';
+        }
+
+        function mostrarErrorSocio(mensaje) {
+            const p = document.getElementById('errorFormSocio');
+            p.textContent = mensaje;
+            p.style.display = 'block';
+        }
+
         function abrirModalNuevo() {
             document.getElementById('modalTitulo').textContent = 'Agregar socio';
             document.getElementById('id_socio').value = '';
@@ -167,18 +182,84 @@ $letras = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P',
             document.getElementById('so_nombre').value = '';
             document.getElementById('so_apellido').value = '';
             document.getElementById('so_telefono').value = '';
+            document.getElementById('so_correo').value = '';
+            ocultarErrorSocio();
             abrirModal();
         }
 
-        function abrirModalEditar(id, cedula, nombre, apellido, telefono) {
+        function abrirModalEditar(id, cedula, nombre, apellido, telefono, correo) {
             document.getElementById('modalTitulo').textContent = 'Editar socio';
             document.getElementById('id_socio').value = id;
             document.getElementById('so_cedula').value = cedula;
             document.getElementById('so_nombre').value = nombre;
             document.getElementById('so_apellido').value = apellido;
             document.getElementById('so_telefono').value = telefono;
+            document.getElementById('so_correo').value = correo;
+            ocultarErrorSocio();
             abrirModal();
         }
+
+        // ---------- Restricción de teclado: solo números / solo letras ----------
+        function permitirSoloNumeros(input) {
+            input.addEventListener('input', () => {
+                input.value = input.value.replace(/\D/g, '');
+            });
+        }
+
+        function permitirSoloLetras(input) {
+            input.addEventListener('input', () => {
+                input.value = input.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿñÑ\s]/g, '');
+            });
+        }
+
+        permitirSoloNumeros(document.getElementById('so_cedula'));
+        permitirSoloNumeros(document.getElementById('so_telefono'));
+        permitirSoloLetras(document.getElementById('so_nombre'));
+        permitirSoloLetras(document.getElementById('so_apellido'));
+
+        // ---------- Envío por AJAX: si hay error, se muestra dentro del modal ----------
+        document.getElementById('formSocio').addEventListener('submit', function (e) {
+            e.preventDefault();
+            ocultarErrorSocio();
+
+            const cedula = document.getElementById('so_cedula').value.trim();
+            const nombre = document.getElementById('so_nombre').value.trim();
+            const apellido = document.getElementById('so_apellido').value.trim();
+            const telefono = document.getElementById('so_telefono').value.trim();
+            const correo = document.getElementById('so_correo').value.trim();
+
+            if (cedula === '' || nombre === '' || apellido === '' || correo === '') {
+                return mostrarErrorSocio('Cédula, nombre, apellido y correo son obligatorios.');
+            }
+            if (cedula.length !== 10) {
+                return mostrarErrorSocio('La cédula debe tener 10 dígitos.');
+            }
+            if (telefono !== '' && (telefono.length < 7 || telefono.length > 15)) {
+                return mostrarErrorSocio('El teléfono debe tener entre 7 y 15 dígitos.');
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+                return mostrarErrorSocio('El correo ingresado no es válido.');
+            }
+
+            const datos = new FormData(this);
+
+            fetch(this.action, {
+                method: 'POST',
+                body: datos,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(resp => resp.json())
+                .then(data => {
+                    if (data.ok) {
+                        window.location.href = 'socios.php';
+                    } else {
+                        mostrarErrorSocio(data.mensaje || 'No se pudo guardar el socio.');
+                    }
+                })
+                .catch(() => {
+                    mostrarErrorSocio('Ocurrió un error de conexión. Inténtalo de nuevo.');
+                });
+        });
 
         // ---------- Filtro alfabético + buscador (solo oculta/muestra tarjetas) ----------
         let filtroNombre = 'TODOS';
