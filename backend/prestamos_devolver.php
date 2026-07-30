@@ -19,11 +19,11 @@ $idPrestamo = trim($_POST['id_prestamo']);
 try {
     $pdo->beginTransaction();
 
-    $stmt = $pdo->prepare("SELECT id_ejemplar, pr_f_dev FROM prestamo WHERE id_prestamo = ? FOR UPDATE");
+    $stmt = $pdo->prepare("SELECT id_ejemplar, pr_f_dev_real FROM prestamo WHERE id_prestamo = ? FOR UPDATE");
     $stmt->execute([$idPrestamo]);
     $prestamo = $stmt->fetch();
 
-    if (!$prestamo || $prestamo['pr_f_dev'] !== null) {
+    if (!$prestamo || $prestamo['pr_f_dev_real'] !== null) {
         // No existe o ya estaba devuelto: no hay nada que hacer
         $pdo->rollBack();
         header('Location: ../prestamos.php');
@@ -31,7 +31,7 @@ try {
     }
 
     $pdo->prepare(
-        "UPDATE prestamo SET pr_f_dev = CURRENT_DATE WHERE id_prestamo = ?"
+        "UPDATE prestamo SET pr_f_dev_real = CURRENT_DATE WHERE id_prestamo = ?"
     )->execute([$idPrestamo]);
 
     $pdo->prepare(

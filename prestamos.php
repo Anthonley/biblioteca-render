@@ -11,7 +11,7 @@ $usuario = $_SESSION['usuario_activo'];
 require_once 'backend/conexion.php';
 
 $prestamos = $pdo->query(
-    "SELECT p.id_prestamo, p.pr_f_pres, p.pr_f_dev,
+    "SELECT p.id_prestamo, p.pr_f_pres, p.pr_f_dev_esperada, p.pr_f_dev_real,
             so.so_nombre, so.so_apellido, so.so_cedula,
             l.li_titulo, sd.se_nombre
      FROM prestamo p
@@ -19,22 +19,27 @@ $prestamos = $pdo->query(
      INNER JOIN libro l ON l.id_libro = e.id_libro
      INNER JOIN sede_biblioteca sd ON sd.id_sede = e.id_sede
      INNER JOIN socio so ON so.id_socio = p.id_socio
-     ORDER BY (p.pr_f_dev IS NULL) DESC, p.pr_f_pres DESC"
+     ORDER BY (p.pr_f_dev_real IS NULL) DESC, p.pr_f_pres DESC"
 )->fetchAll();
 
-$prestamosActivos  = array_filter($prestamos, fn($p) => $p['pr_f_dev'] === null);
-$prestamosDevueltos = array_filter($prestamos, fn($p) => $p['pr_f_dev'] !== null);
+$prestamosActivos   = array_filter($prestamos, fn($p) => $p['pr_f_dev_real'] === null);
+$prestamosDevueltos = array_filter($prestamos, fn($p) => $p['pr_f_dev_real'] !== null);
+
+$sedes = $pdo->query(
+    "SELECT id_sede, se_nombre FROM sede_biblioteca ORDER BY se_nombre"
+)->fetchAll();
 
 $socios = $pdo->query(
     "SELECT id_socio, so_nombre, so_apellido, so_cedula FROM socio ORDER BY so_nombre, so_apellido"
 )->fetchAll();
 
-// Solo se pueden prestar ejemplares que estén Disponibles
+// Solo se pueden prestar ejemplares que estén Disponibles.
+// Se traen todos (de todas las sedes) y el JS del modal filtra por sede
+// una vez que el usuario elige la sede en el paso 1.
 $ejemplaresDisponibles = $pdo->query(
-    "SELECT e.id_ejemplar, l.li_titulo, sd.se_nombre
+    "SELECT e.id_ejemplar, e.id_sede, l.li_titulo
      FROM ejemplar e
      INNER JOIN libro l ON l.id_libro = e.id_libro
-     INNER JOIN sede_biblioteca sd ON sd.id_sede = e.id_sede
      WHERE e.ej_estado = 'Disponible'
      ORDER BY l.li_titulo"
 )->fetchAll();
@@ -58,8 +63,9 @@ $ejemplaresDisponibles = $pdo->query(
 
         <?php
         $mensajes = [
-            'noselecciono'  => 'Debes seleccionar un socio y un ejemplar disponible.',
+            'noselecciono'  => 'Debes completar la sede, el ejemplar, el socio y la fecha de devolución.',
             'nodisponible'  => 'Ese ejemplar ya no está disponible (alguien más lo tomó primero).',
+            'fechainvalida' => 'La fecha de devolución no es válida: no puede ser hoy ni una fecha anterior.',
         ];
         $clave = $_GET['error'] ?? null;
         if ($clave && isset($mensajes[$clave])):
@@ -92,6 +98,7 @@ $ejemplaresDisponibles = $pdo->query(
                         <th>Sede</th>
                         <th>Socio</th>
                         <th>F. préstamo</th>
+                        <th>F. dev. esperada</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -102,6 +109,7 @@ $ejemplaresDisponibles = $pdo->query(
                         <td><?= htmlspecialchars($p['se_nombre']) ?></td>
                         <td><?= htmlspecialchars($p['so_nombre'] . ' ' . $p['so_apellido']) ?> <small class="lib-ayuda">(<?= htmlspecialchars($p['so_cedula']) ?>)</small></td>
                         <td><?= htmlspecialchars($p['pr_f_pres']) ?></td>
+                        <td><?= htmlspecialchars($p['pr_f_dev_esperada']) ?></td>
                         <td class="lib-acciones">
                             <form action="backend/prestamos_devolver.php" method="POST" class="lib-form-inline"
                                   onsubmit="return confirm('¿Marcar este préstamo como devuelto?');">
@@ -133,7 +141,8 @@ $ejemplaresDisponibles = $pdo->query(
                         <th>Sede</th>
                         <th>Socio</th>
                         <th>F. préstamo</th>
-                        <th>F. devolución</th>
+                        <th>F. dev. esperada</th>
+                        <th>F. devolución real</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -144,7 +153,8 @@ $ejemplaresDisponibles = $pdo->query(
                         <td><?= htmlspecialchars($p['se_nombre']) ?></td>
                         <td><?= htmlspecialchars($p['so_nombre'] . ' ' . $p['so_apellido']) ?> <small class="lib-ayuda">(<?= htmlspecialchars($p['so_cedula']) ?>)</small></td>
                         <td><?= htmlspecialchars($p['pr_f_pres']) ?></td>
-                        <td><?= htmlspecialchars($p['pr_f_dev']) ?></td>
+                        <td><?= htmlspecialchars($p['pr_f_dev_esperada']) ?></td>
+                        <td><?= htmlspecialchars($p['pr_f_dev_real']) ?></td>
                         <td class="lib-acciones">
                             <form action="backend/prestamos_eliminar.php" method="POST" class="lib-form-inline lib-form-inline--ancho"
                                   onsubmit="return confirm('¿Eliminar este registro de préstamo?');">
@@ -169,38 +179,52 @@ $ejemplaresDisponibles = $pdo->query(
                 <button type="button" class="lib-modal__cerrar" onclick="cerrarModal()">&times;</button>
             </div>
 
-            <form action="backend/prestamos_guardar.php" method="POST">
-                <label for="id_socio">Socio</label>
-                <select id="id_socio" name="id_socio" required>
-                    <option value="">Seleccione…</option>
-                    <?php foreach ($socios as $s): ?>
-                        <option value="<?= htmlspecialchars($s['id_socio'], ENT_QUOTES) ?>">
-                            <?= htmlspecialchars($s['so_nombre'] . ' ' . $s['so_apellido'] . ' — ' . $s['so_cedula']) ?>
+            <form action="backend/prestamos_guardar.php" method="POST" id="formPrestamo">
+                <!-- Paso 1: primero se elige la sede -->
+                <label for="modal_id_sede">Sede</label>
+                <select id="modal_id_sede" name="id_sede" required onchange="cambiarSede()">
+                    <option value="">Seleccione una sede…</option>
+                    <?php foreach ($sedes as $sd): ?>
+                        <option value="<?= htmlspecialchars($sd['id_sede'], ENT_QUOTES) ?>">
+                            <?= htmlspecialchars($sd['se_nombre']) ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
 
-                <label for="id_ejemplar">Ejemplar disponible</label>
-                <select id="id_ejemplar" name="id_ejemplar" required>
-                    <option value="">Seleccione…</option>
-                    <?php foreach ($ejemplaresDisponibles as $e): ?>
-                        <option value="<?= htmlspecialchars($e['id_ejemplar'], ENT_QUOTES) ?>">
-                            <?= htmlspecialchars($e['li_titulo'] . ' — ' . $e['se_nombre']) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-                <?php if (empty($ejemplaresDisponibles)): ?>
-                    <p class="lib-ayuda">No hay ejemplares disponibles en este momento.</p>
-                <?php endif; ?>
+                <!-- Paso 2: solo aparece cuando ya hay una sede elegida -->
+                <div id="pasoDosPrestamo" style="display:none;">
+                    <label for="modal_id_ejemplar">Ejemplar disponible en esta sede</label>
+                    <select id="modal_id_ejemplar" name="id_ejemplar">
+                        <option value="">Seleccione…</option>
+                    </select>
+                    <p id="avisoSinEjemplares" class="lib-ayuda" style="display:none;">No hay ejemplares disponibles en esta sede.</p>
 
-                <p class="lib-ayuda">La fecha de préstamo se registra automáticamente con la fecha de hoy.</p>
+                    <label for="modal_id_socio">Socio</label>
+                    <select id="modal_id_socio" name="id_socio">
+                        <option value="">Seleccione…</option>
+                        <?php foreach ($socios as $s): ?>
+                            <option value="<?= htmlspecialchars($s['id_socio'], ENT_QUOTES) ?>">
+                                <?= htmlspecialchars($s['so_nombre'] . ' ' . $s['so_apellido'] . ' — ' . $s['so_cedula']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
 
-                <button type="submit" class="lib-btn-primario" style="margin-top:1rem;">Registrar préstamo</button>
+                    <label for="modal_f_dev">Fecha de devolución</label>
+                    <input type="date" id="modal_f_dev" name="pr_f_dev_esperada">
+                    <p class="lib-ayuda">La fecha de préstamo se registra automáticamente con la de hoy. No se pueden elegir fechas de hoy hacia atrás en el calendario.</p>
+                    <p id="avisoFecha" class="lib-alerta" style="display:none; margin-top:0.4rem;">Elige una fecha de devolución válida (no puede ser hoy ni una fecha anterior).</p>
+
+                    <button type="submit" class="lib-btn-primario" style="margin-top:1rem;">Registrar préstamo</button>
+                </div>
             </form>
         </div>
     </div>
 
     <script>
+        // Ejemplares disponibles de TODAS las sedes; el modal los filtra en el navegador
+        // según la sede que el usuario elija en el paso 1 (sin recargar la página).
+        const ejemplaresPorSede = <?= json_encode($ejemplaresDisponibles, JSON_UNESCAPED_UNICODE) ?>;
+
         function cambiarPestana(cual) {
             const activos = cual === 'activos';
             document.getElementById('tabActivos').style.display = activos ? 'block' : 'none';
@@ -215,11 +239,84 @@ $ejemplaresDisponibles = $pdo->query(
         function cerrarModal() {
             document.getElementById('modalPrestamo').classList.remove('lib-modal-fondo--visible');
         }
+
         function abrirModalNuevo() {
-            document.getElementById('id_socio').value = '';
-            document.getElementById('id_ejemplar').value = '';
+            document.getElementById('modal_id_sede').value = '';
+            document.getElementById('modal_id_socio').value = '';
+            document.getElementById('modal_f_dev').value = '';
+            document.getElementById('avisoFecha').style.display = 'none';
+            document.getElementById('pasoDosPrestamo').style.display = 'none';
             abrirModal();
         }
+
+        // Paso 1 -> Paso 2: al elegir la sede, se rellena el select de ejemplares
+        // solo con los disponibles de esa sede y se revela el resto del formulario.
+        function cambiarSede() {
+            const idSede = document.getElementById('modal_id_sede').value;
+            const pasoDos = document.getElementById('pasoDosPrestamo');
+            const selectEjemplar = document.getElementById('modal_id_ejemplar');
+            const avisoSinEjemplares = document.getElementById('avisoSinEjemplares');
+
+            selectEjemplar.innerHTML = '<option value="">Seleccione…</option>';
+
+            if (!idSede) {
+                pasoDos.style.display = 'none';
+                return;
+            }
+
+            const disponibles = ejemplaresPorSede.filter(e => e.id_sede === idSede);
+
+            disponibles.forEach(e => {
+                const opcion = document.createElement('option');
+                opcion.value = e.id_ejemplar;
+                opcion.textContent = e.li_titulo;
+                selectEjemplar.appendChild(opcion);
+            });
+
+            avisoSinEjemplares.style.display = disponibles.length === 0 ? 'block' : 'none';
+
+            selectEjemplar.required = true;
+            document.getElementById('modal_id_socio').required = true;
+            document.getElementById('modal_f_dev').required = true;
+
+            pasoDos.style.display = 'block';
+        }
+
+        // No se pueden elegir fechas pasadas: se bloquean directamente en el
+        // propio calendario del navegador con el atributo "min" (igual que en
+        // los formularios de cédula), en vez de dejar elegir y luego avisar.
+        function fechaMinimaPermitida() {
+            const manana = new Date();
+            manana.setDate(manana.getDate() + 1);
+            const año = manana.getFullYear();
+            const mes = String(manana.getMonth() + 1).padStart(2, '0');
+            const dia = String(manana.getDate()).padStart(2, '0');
+            return `${año}-${mes}-${dia}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('modal_f_dev').setAttribute('min', fechaMinimaPermitida());
+        });
+
+        const campoFechaDev = document.getElementById('modal_f_dev');
+        campoFechaDev.addEventListener('change', function () {
+            const aviso = document.getElementById('avisoFecha');
+            if (this.value && this.value < this.min) {
+                this.value = '';
+                aviso.style.display = 'block';
+            } else {
+                aviso.style.display = 'none';
+            }
+        });
+
+        // Segunda barrera por si el navegador permitiera escribir la fecha a mano.
+        document.getElementById('formPrestamo').addEventListener('submit', function (e) {
+            const fecha = document.getElementById('modal_f_dev');
+            if (fecha.offsetParent !== null && fecha.value < fecha.min) {
+                e.preventDefault();
+                document.getElementById('avisoFecha').style.display = 'block';
+            }
+        });
     </script>
 </body>
 </html>

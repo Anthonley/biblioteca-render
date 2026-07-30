@@ -371,7 +371,7 @@ h1, h2, h3, .lib-navbar__brand h1 {
     font-size: 0.88rem;
     margin-top: 0.8rem;
 }
-.lib-modal form input[type="text"], .lib-modal form input[type="email"], .lib-modal form select {
+.lib-modal form input[type="text"], .lib-modal form input[type="email"], .lib-modal form input[type="date"], .lib-modal form select {
     width: 100%;
     padding: 0.5rem 0.65rem;
     margin-top: 0.3rem;

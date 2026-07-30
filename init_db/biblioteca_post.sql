@@ -67,8 +67,9 @@ CREATE TABLE prestamo (
     id_prestamo VARCHAR(10) PRIMARY KEY,
     id_ejemplar VARCHAR(10) NOT NULL,
     id_socio VARCHAR(10) NOT NULL,
-    pr_f_pres DATE NOT NULL DEFAULT CURRENT_DATE, 
-    pr_f_dev DATE,
+    pr_f_pres DATE NOT NULL DEFAULT CURRENT_DATE,
+    pr_f_dev_esperada DATE NOT NULL,
+    pr_f_dev_real DATE,
     FOREIGN KEY (id_ejemplar) REFERENCES ejemplar(id_ejemplar) ON DELETE CASCADE,
     FOREIGN KEY (id_socio) REFERENCES socio(id_socio) ON DELETE CASCADE
 );
@@ -133,17 +134,17 @@ INSERT INTO ejemplar (id_ejemplar, id_libro, id_sede, ej_estado) VALUES
 ('EJ-0009', 'LI-0009', 'SE-0008', 'Disponible'),
 ('EJ-0010', 'LI-0010', 'SE-0009', 'Prestado');
 
-INSERT INTO prestamo (id_prestamo, id_ejemplar, id_socio, pr_f_pres, pr_f_dev) VALUES
-('PR-0001', 'EJ-0002', 'SO-0001', '2026-07-01', '2026-07-10'), 
-('PR-0002', 'EJ-0006', 'SO-0002', '2026-07-05', NULL),         
-('PR-0003', 'EJ-0010', 'SO-0003', '2026-07-15', NULL),        
-('PR-0004', 'EJ-0001', 'SO-0004', '2026-06-10', '2026-06-20'), 
-('PR-0005', 'EJ-0003', 'SO-0005', '2026-06-25', '2026-07-02'), 
-('PR-0006', 'EJ-0005', 'SO-0006', '2026-05-15', '2026-05-30'), 
-('PR-0007', 'EJ-0007', 'SO-0007', '2026-07-20', NULL),         
-('PR-0008', 'EJ-0004', 'SO-0008', '2026-04-10', '2026-04-20'), 
-('PR-0009', 'EJ-0009', 'SO-0009', '2026-07-22', NULL),         
-('PR-0010', 'EJ-0008', 'SO-0010', '2026-01-10', '2026-01-25');
+INSERT INTO prestamo (id_prestamo, id_ejemplar, id_socio, pr_f_pres, pr_f_dev_esperada, pr_f_dev_real) VALUES
+('PR-0001', 'EJ-0002', 'SO-0001', '2026-07-01', '2026-07-10', '2026-07-10'),
+('PR-0002', 'EJ-0006', 'SO-0002', '2026-07-05', '2026-08-05', NULL),
+('PR-0003', 'EJ-0010', 'SO-0003', '2026-07-15', '2026-08-15', NULL),
+('PR-0004', 'EJ-0001', 'SO-0004', '2026-06-10', '2026-06-20', '2026-06-20'),
+('PR-0005', 'EJ-0003', 'SO-0005', '2026-06-25', '2026-07-02', '2026-07-02'),
+('PR-0006', 'EJ-0005', 'SO-0006', '2026-05-15', '2026-05-30', '2026-05-30'),
+('PR-0007', 'EJ-0007', 'SO-0007', '2026-07-20', '2026-08-20', NULL),
+('PR-0008', 'EJ-0004', 'SO-0008', '2026-04-10', '2026-04-20', '2026-04-20'),
+('PR-0009', 'EJ-0009', 'SO-0009', '2026-07-22', '2026-08-22', NULL),
+('PR-0010', 'EJ-0008', 'SO-0010', '2026-01-10', '2026-01-25', '2026-01-25');
 
 INSERT INTO genero (id_genero, ge_nombre) VALUES
 ('GE-0001', 'Ficción Mágica'),
