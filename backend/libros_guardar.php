@@ -66,14 +66,22 @@ if ($editorial !== '') {
 }
 
 // ---- ISBN: opcional; si viene, debe quedar en 10 o 13 dígitos (se ignoran guiones/espacios) ----
+// ---- ISBN: opcional; si viene, debe tener 10 o 13 caracteres (números o 'X') ----
 if ($isbn !== '') {
+    // Limpiamos cualquier guion o espacio que el usuario haya puesto por costumbre
     $isbnLimpio = preg_replace('/[\s-]/', '', $isbn);
+    
     $valido10 = preg_match('/^\d{9}[\dXx]$/', $isbnLimpio);
     $valido13 = preg_match('/^\d{13}$/', $isbnLimpio);
+    
     if (!$valido10 && !$valido13) {
         header('Location: ../libros.php?error=isbninvalido');
         exit();
     }
+    
+    // Reemplazamos la variable original por la limpia y en mayúscula (por la 'X')
+    // Esta es la variable que se insertará en la base de datos
+    $isbn = strtoupper($isbnLimpio);
 }
 
 try {

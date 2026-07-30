@@ -156,8 +156,8 @@ $siguienteIdLibro = 'LI-' . str_pad((string)($maxNum + 1), 4, '0', STR_PAD_LEFT)
                 <input type="text" id="li_editorial" name="li_editorial" placeholder="Opcional">
 
                 <label for="li_isbn">ISBN</label>
-                <input type="text" id="li_isbn" name="li_isbn" placeholder="Ej. 978-0-441-01359-3">
-                <p class="lib-ayuda">Opcional. 10 o 13 dígitos (se ignoran guiones).</p>
+                <input type="text" id="li_isbn" name="li_isbn" placeholder="Ej. 9780441013593">
+                <p class="lib-ayuda">Opcional. Ingresa 10 o 13 dígitos (solo números).</p>
 
                 <label>Géneros</label>
                 <div class="lib-generos-selector">
@@ -355,6 +355,8 @@ $siguienteIdLibro = 'LI-' . str_pad((string)($maxNum + 1), 4, '0', STR_PAD_LEFT)
                     e.preventDefault();
                     return mostrarErrorLibro('El ISBN no es válido (debe tener 10 o 13 dígitos).');
                 }
+                // Forzamos a que el input envíe el valor limpio sin guiones
+                document.getElementById('li_isbn').value = isbnLimpio.toUpperCase();
             }
         });
     </script>

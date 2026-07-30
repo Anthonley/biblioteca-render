@@ -105,15 +105,15 @@ INSERT INTO sede_biblioteca (id_sede, se_nombre, se_direccion) VALUES
 
 INSERT INTO libro (id_libro, li_titulo, li_autor, li_editorial, li_genero, li_isbn) VALUES
 ('LI-0001', 'Cien años de soledad', 'Gabriel García Márquez', 'Sudamericana', 'Ficción Mágica', '978-84-376-0494-7'),
-('LI-0002', '1984', 'George Orwell', 'Secker & Warburg', 'Ciencia Ficción', '978-0-452-28423-4'),
-('LI-0003', 'El Hobbit', 'J.R.R. Tolkien', 'Allen & Unwin', 'Fantasía', '978-0-261-10221-7'),
-('LI-0004', 'Fundación', 'Isaac Asimov', 'Gnome Press', 'Ciencia Ficción', '978-0-553-29335-0'),
-('LI-0005', 'Orgullo y Prejuicio', 'Jane Austen', 'T. Egerton', 'Romance', '978-0-14-143951-8'),
-('LI-0006', 'El nombre de la rosa', 'Umberto Eco', 'Bompiani', 'Misterio', '978-84-08-04364-6'),
-('LI-0007', 'Fahrenheit 451', 'Ray Bradbury', 'Ballantine Books', 'Ciencia Ficción', '978-1-4516-7331-9'),
-('LI-0008', 'La sombra del viento', 'Carlos Ruiz Zafón', 'Planeta', 'Misterio', '978-84-08-04364-7'),
-('LI-0009', 'Rayuela', 'Julio Cortázar', 'Sudamericana', 'Novela Contemporánea', '978-84-376-0495-4'),
-('LI-0010', 'Dune', 'Frank Herbert', 'Chilton Books', 'Ciencia Ficción', '978-0-441-01359-3');
+('LI-0002', '1984', 'George Orwell', 'Secker & Warburg', 'Ciencia Ficción', '9780452284234'),
+('LI-0003', 'El Hobbit', 'J.R.R. Tolkien', 'Allen & Unwin', 'Fantasía', '978061102217'),
+('LI-0004', 'Fundación', 'Isaac Asimov', 'Gnome Press', 'Ciencia Ficción', '9780553293350'),
+('LI-0005', 'Orgullo y Prejuicio', 'Jane Austen', 'T. Egerton', 'Romance', '9780141439518'),
+('LI-0006', 'El nombre de la rosa', 'Umberto Eco', 'Bompiani', 'Misterio', '9788408043646'),
+('LI-0007', 'Fahrenheit 451', 'Ray Bradbury', 'Ballantine Books', 'Ciencia Ficción', '9781451673319'),
+('LI-0008', 'La sombra del viento', 'Carlos Ruiz Zafón', 'Planeta', 'Misterio', '9788408043647'),
+('LI-0009', 'Rayuela', 'Julio Cortázar', 'Sudamericana', 'Novela Contemporánea', '9788437604954'),
+('LI-0010', 'Dune', 'Frank Herbert', 'Chilton Books', 'Ciencia Ficción', '9780441013593');
 
 INSERT INTO socio (id_socio, so_cedula, so_nombre, so_apellido, so_telefono, so_correo) VALUES
 ('SO-0001', '1712345671', 'Juan', 'Perez', '0991111111', 'juan.perez@example.com'),
