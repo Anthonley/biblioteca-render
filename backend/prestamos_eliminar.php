@@ -19,13 +19,13 @@ $idPrestamo = trim($_POST['id_prestamo']);
 try {
     $pdo->beginTransaction();
 
-    $stmt = $pdo->prepare("SELECT id_ejemplar, pr_f_dev FROM prestamo WHERE id_prestamo = ? FOR UPDATE");
+    $stmt = $pdo->prepare("SELECT id_ejemplar, pr_f_dev_real FROM prestamo WHERE id_prestamo = ? FOR UPDATE");
     $stmt->execute([$idPrestamo]);
     $prestamo = $stmt->fetch();
 
     if ($prestamo) {
         // Si el préstamo seguía activo, el ejemplar vuelve a estar Disponible
-        if ($prestamo['pr_f_dev'] === null) {
+        if ($prestamo['pr_f_dev_real'] === null) {
             $pdo->prepare(
                 "UPDATE ejemplar SET ej_estado = 'Disponible' WHERE id_ejemplar = ?"
             )->execute([$prestamo['id_ejemplar']]);

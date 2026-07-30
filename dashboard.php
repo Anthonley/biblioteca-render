@@ -16,7 +16,7 @@ $totalEjemplares  = (int) $pdo->query("SELECT COUNT(*) FROM ejemplar")->fetchCol
 $totalSocios      = (int) $pdo->query("SELECT COUNT(*) FROM socio")->fetchColumn();
 $totalSedes       = (int) $pdo->query("SELECT COUNT(*) FROM sede_biblioteca")->fetchColumn();
 $totalGeneros     = (int) $pdo->query("SELECT COUNT(*) FROM genero")->fetchColumn();
-$prestamosActivos = (int) $pdo->query("SELECT COUNT(*) FROM prestamo WHERE pr_f_dev IS NULL")->fetchColumn();
+$prestamosActivos = (int) $pdo->query("SELECT COUNT(*) FROM prestamo WHERE pr_f_dev_real IS NULL")->fetchColumn();
 $prestamosTotal   = (int) $pdo->query("SELECT COUNT(*) FROM prestamo")->fetchColumn();
 $prestamosDevueltos = $prestamosTotal - $prestamosActivos;
 

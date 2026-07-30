@@ -18,7 +18,7 @@ $idSocio = trim($_POST['id_socio']);
 
 try {
     $stmt = $pdo->prepare(
-        "SELECT COUNT(*) FROM prestamo WHERE id_socio = ? AND pr_f_dev IS NULL"
+        "SELECT COUNT(*) FROM prestamo WHERE id_socio = ? AND pr_f_dev_real IS NULL"
     );
     $stmt->execute([$idSocio]);
 

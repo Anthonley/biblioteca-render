@@ -21,7 +21,7 @@ try {
     $stmt = $pdo->prepare(
         "SELECT COUNT(*) FROM prestamo p
          INNER JOIN ejemplar e ON e.id_ejemplar = p.id_ejemplar
-         WHERE e.id_libro = ? AND p.pr_f_dev IS NULL"
+         WHERE e.id_libro = ? AND p.pr_f_dev_real IS NULL"
     );
     $stmt->execute([$idLibro]);
 
